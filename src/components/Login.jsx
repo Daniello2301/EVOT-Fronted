@@ -37,10 +37,15 @@ function Login() {
       if (data.error) {
         setErrores(data.errors);
       } else {
-        localStorage.setItem('TOKEN', data?.usuario?.token)
+        /* localStorage.setItem('TOKEN', data?.usuario?.tokens?.token) */
+
+        localStorage.setItem('REFRESH_TOKENS', data?.usuario?.tokens?.refreshToken)
+        console.log("oken: ", data?.usuario?.tokens?.token)
+        console.log("refreshToken: ", data?.usuario?.tokens?.refreshToken)
+
         localStorage.setItem('USER', JSON.stringify(data?.usuario))
         setUsuario(data.usuario);
-        setAuthUser(data.usuario);
+        setAuthUser({ ...data.usuario, accessToken: data?.usuario?.tokens?.token });
         setIsLoggedIn(true)
       }
 

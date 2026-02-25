@@ -291,11 +291,17 @@ function CreateDiplomaModal({ props }) {
                                                 Institucion
                                             </option>
                                             {
-                                                institutions.map((intuticion) => (
-                                                    <option key={intuticion._id} value={intuticion._id}>
-                                                        {intuticion.nombreInstitucion}
+                                                institutions.length > 0 ? (
+                                                    institutions.map((intuticion) => (
+                                                        <option key={intuticion._id} value={intuticion._id}>
+                                                            {intuticion.nombreInstitucion}
+                                                        </option>
+                                                    ))
+                                                ) : (
+                                                    <option>
+                                                        No hay instituciones para mostrar
                                                     </option>
-                                                ))
+                                                )
                                             }
                                         </select>
                                     </div>
