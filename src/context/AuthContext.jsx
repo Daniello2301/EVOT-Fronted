@@ -1,96 +1,130 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { loginService, logoutService, refreshTokenService } from "../services/auth.service";
 
 const AuthContext = createContext();
 
-export function useAuth() {
-    return useContext(AuthContext)
-}
+// Custom hook para usar el contexto de autenticación
+export const useAuth = () => useContext(AuthContext);
 
+// Proveedor de autenticación que envuelve la aplicación
 export const AuthProvider = ({ children }) => {
+
+    // Estado para almacenar el usuario autenticado y el estado de inicio de sesión
     const [authUser, setAuthUser] = useState(null);
-    const [isloggedIn, setIsLoggedIn] = useState(false);
+    // Estado para indicar si el usuario está autenticado o no
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    // Estado para indicar si se está cargando la autenticación (útil para mostrar un spinner mientras se verifica el token)
     const [loading, setLoading] = useState(true);
 
+    // ============================================================
+    // Login
+    // ============================================================
+    const login = async (correo, contraseña) => {
+
+        // Llamamos al servicio de login para obtener el token y la información del usuario
+        const data = await loginService({ correo, contraseña });
+
+        // Extraemos el token, refreshToken y la información del usuario del response
+        const { token, refreshToken, ...usuario } = data.usuario.tokens
+            ? { // Si el backend devuelve los tokens dentro de un objeto "tokens", los extraemos de ahí
+                token: data.usuario.tokens.token,
+                refreshToken: data.usuario.tokens.refreshToken,
+                ...data.usuario
+            }// Si el backend devuelve los tokens directamente en el objeto usuario, los extraemos de ahí
+            : data;
+
+        // Guardamos el token y el refreshToken en localStorage para mantener la sesión activa           
+        localStorage.setItem('ACCESS_TOKEN', token);
+        localStorage.setItem('REFRESH_TOKEN', refreshToken);
+
+        // Actualizamos el estado del usuario autenticado y el estado de inicio de sesión
+        setAuthUser({ ...usuario, accessToken: token });
+        setIsLoggedIn(true);
+    };
+
+    // ============================================================
     // Logout
-    const logout = () => {
-        localStorage.clear();
-        setAuthUser(null);
-        setIsLoggedIn(false);
-    }
-
-
-    // Refresh access token
-    const refreshAccessToken = async () => {
-
+    // ============================================================
+    const logout = async () => {
         try {
+            // Intentamos invalidar el token en el backend para cerrar la sesión de forma segura
+            const token = localStorage.getItem('ACCESS_TOKEN');
+            if (token) await logoutService(token); // invalida tokenVersion en backend
+        } catch (error) {
+            // si falla el backend igual limpiamos localmente
+        } finally {
+            // Limpiamos el token y la información del usuario del localStorage y del estado
+            localStorage.removeItem('ACCESS_TOKEN');
+            localStorage.removeItem('REFRESH_TOKEN');
+            setAuthUser(null);
+            setIsLoggedIn(false);
+        }
+    };
 
-            const refreshToken = localStorage.getItem('REFRESH_TOKENS');
-            if (!refreshToken) return null;
+    // ============================================================
+    // Refresh access token
+    // ============================================================
+    const refreshAccessToken = async () => {
+        try {
+            // Obtenemos el refresh token del localStorage
+            const refreshToken = localStorage.getItem('REFRESH_TOKEN');
+            if (!refreshToken) return null; // Si no hay refresh token, no podemos refrescar el access token
 
-            const response = await fetch('http://localhost:4000/api/auth/refresh/token', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${refreshToken}`
-                }
-            });
+            // Llamamos al servicio de refresh token para obtener un nuevo access token
+            const data = await refreshTokenService(refreshToken);
 
-            if (!response.ok) {
-                logout();
-                return null;
-            }
+            // Si obtenemos un nuevo token, lo guardamos en localStorage y actualizamos el estado del usuario autenticado
+            const newToken = data.token;
+            localStorage.setItem('ACCESS_TOKEN', newToken);
+            setAuthUser(prev => ({ ...prev, accessToken: newToken }));
+            setIsLoggedIn(true);
 
-            const data = await response.json();
-
-            setAuthUser({ ...data.usuario, accessToken: data?.token });
-
-            return data?.token
+            return newToken;
 
         } catch (error) {
-
-            logout();
+            await logout();
             return null;
         }
+    };
 
-    }
-    // Reset session
-
+    // ============================================================
+    // Inicializar sesión al montar la app
+    // ============================================================
     useEffect(() => {
-
+        // Función para verificar si hay un refresh token válido al cargar la aplicación y refrescar el access token
         const initializeAuth = async () => {
-            const refreshToken = localStorage.getItem("REFRESH_TOKEN");
+            try {
+                // Verificamos si hay un refresh token en localStorage
+                const refreshToken = localStorage.getItem('REFRESH_TOKEN');
+                if (!refreshToken) return;
 
+                // Si hay un refresh token, intentamos refrescar el access token para mantener la sesión activa
+                await refreshAccessToken();
 
-            if (!refreshToken) {
-                setLoading(false)
-                return;
+            } catch (error) {
+                // Si ocurre un error al refrescar el token (por ejemplo, el refresh token es inválido o ha expirado), cerramos la sesión
+                await logout();
+            } finally {
+                setLoading(false);
             }
-
-            const newToken = await refreshAccessToken();
-
-            if (newToken) {
-                setLoading(true)
-            }
-
-            setLoading(false)
-
         };
 
+        // Llamamos a la función de inicialización de autenticación al montar el componente
         initializeAuth();
-
-    }, [])
+    }, []);
 
     return (
-        <AuthContext.Provider
-            value={{
-                authUser,
-                setAuthUser,
-                isloggedIn,
-                setIsLoggedIn,
-                logout,
-                refreshAccessToken,
-                loading
-            }} >
+        // Proveemos el contexto de autenticación a toda la aplicación con los valores y funciones necesarias para manejar la autenticación
+        <AuthContext.Provider value={{
+            authUser,
+            setAuthUser,
+            isLoggedIn,
+            setIsLoggedIn,
+            login,
+            logout,
+            refreshAccessToken,
+            loading
+        }}>
             {children}
         </AuthContext.Provider>
     );
