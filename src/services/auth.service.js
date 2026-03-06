@@ -1,33 +1,29 @@
-import { axiosConfig } from "../helpers/axios.config";
+import { axiosConfig } from '../helpers/axios.config';
 
-// AuthService.js
+// Auth services
+
+// login
 export const loginService = async (data) => {
-    const response = await axiosConfig.post('auth/login', data);
-    return response.data;
+    const res = await axiosConfig.post('auth/login', data);
+    return res.data;
 };
 
-// Logout service to invalidate the token on the server
-export const logoutService = async (token) => {
-    const response = await axiosConfig.post('auth/logout', {}, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
-    return response.data;
+// logout
+export const logoutService = async () => {
+    const res = await axiosConfig.post('auth/logout');
+    return res.data;
 };
 
-// Refresh token service to get a new access token using the refresh token
+// refresgh token
 export const refreshTokenService = async (refreshToken) => {
-    // Send the refresh token in the Authorization header
-    const response = await axiosConfig.post('auth/refresh', {}, {
+    const res = await axiosConfig.post('auth/refresh', {}, {
         headers: { Authorization: `Bearer ${refreshToken}` }
     });
-    return response.data;
+    return res.data;
 };
 
-// Reset password service to update the user's password
-export const resetPasswordService = async (data, token) => {
-    // Send the new password data along with the access token in the Authorization header
-    const response = await axiosConfig.put('auth/reset-password', data, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
-    return response.data;
+// reset password
+export const resetPasswordService = async (data) => {
+    const res = await axiosConfig.put('auth/reset-password', data);
+    return res.data;
 };
