@@ -3,9 +3,9 @@ import { useAuth } from "../context/AuthContext";
 import { useEffect } from "react";
 
 export default function AsideDashboard() {
-  const { authUser, isloggedIn } = useAuth();
+/*   const { authUser, isloggedIn } = useAuth();
 
-  const user =  JSON.parse(localStorage.getItem('USER'))
+  const user =  JSON.parse(localStorage.getItem('USER')) */
 
   return (
     <>
@@ -34,7 +34,7 @@ export default function AsideDashboard() {
                 <span class="ml-3">Diplomas</span>
               </Link>
             </li>
-            {
+            {/* {
               user.rol == 'ADMIN' &&
               <li>
                 <Link
@@ -54,7 +54,7 @@ export default function AsideDashboard() {
                   <span class="flex-1 ml-3 whitespace-nowrap">Instituciones</span>
                 </Link>
               </li>
-            }
+            } */}
             <li>
               <Link
                 to={"students"}
@@ -77,7 +77,7 @@ export default function AsideDashboard() {
         </div>
         <div class="absolute bottom-0 left-0 justify-center p-4 space-x-4 w-full lg:flex bg-gray_primary z-20 border-r ">
           <p class="z-10 py-2 text-sm font-medium text-blue_dark rounded-lg shadow-sm">
-            {authUser ? authUser.correo : "email user"}
+            {/* {authUser ? authUser.correo : "email user"} */} email user
           </p>
         </div>
       </aside>

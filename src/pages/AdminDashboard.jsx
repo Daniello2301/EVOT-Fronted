@@ -42,9 +42,9 @@ const AdminDashboard = () => {
                 <div class="grid grid-cols-1 mb-4">
 
                   <Routes>
-                    <Route path="institutions" element={<InstitutionsViewDashboard />} />
+                    <Route path="institutions" element={<InstitutionsViewDashboard />} />{/* 
                     <Route path="diplomas" element={<DiplomasViewDashboard />} />
-                    <Route path="students" element={<StudentsViewDashboard />} />
+                    <Route path="students" element={<StudentsViewDashboard />} /> */}
                   </Routes>
 
                 </div>

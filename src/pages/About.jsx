@@ -1,23 +1,75 @@
-import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import aboutImg from "../assets/about.jpg";
 
-export default function () {
+export default function About() {
     return (
-        <>
+        <div className="flex flex-col min-h-screen">
             <Navbar />
-            <main className="w-screen h-screen  py-6 grid place-items-center">
-                <section className="w-full h-64 flex items-center justify-center bg-[url('../../src/assets/about.jpg')] bg-auto bg-origin-content bg-top ">
-                    <h1 className="w-full mb-4 text-4xl font-extrabold tracking-tight text-white_primary text-center leading-none md:text-5xl xl:text-6xl">
+            <main className="flex-1 pt-28">
+                {/* Hero */}
+                <section
+                    className="w-full h-64 flex items-center justify-center bg-cover bg-center relative"
+                    style={{ backgroundImage: `url(${aboutImg})` }}
+                >
+                    <div className="absolute inset-0 bg-blue_dark/60" />
+                    <h1 className="relative z-10 text-4xl font-extrabold text-white_primary text-center md:text-5xl">
                         Acerca de Nosotros
                     </h1>
                 </section>
-                <section className="w-1/2 h-64 flex items-center justify-center ">
-                    <p className="text-lg tracking-wide text-justify">
-                        Somos un equipo pequeño de grandes mentes, enfocado en encontrar las mejores soluciones a los problemas mas basicos y cotidianos que se puedan presentar en pequeñas comunidades; con la intencion de no dejar a ningun por fuera
+
+                {/* Misión */}
+                <section className="max-w-3xl mx-auto px-4 py-16 text-center">
+                    <h2 className="text-2xl font-bold text-blue_dark mb-4">
+                        Nuestra Misión
+                    </h2>
+                    <p className="text-lg text-gray-500 tracking-wide text-justify leading-relaxed">
+                        Somos un equipo pequeño de grandes mentes, enfocado en encontrar las
+                        mejores soluciones a los problemas más básicos y cotidianos que se
+                        puedan presentar en pequeñas comunidades, con la intención de no
+                        dejar a ninguno por fuera.
                     </p>
                 </section>
+
+                {/* Valores */}
+                <section className="bg-gray_primary py-16">
+                    <div className="max-w-screen-xl mx-auto px-4">
+                        <h2 className="text-2xl font-bold text-blue_dark text-center mb-10">
+                            Nuestros Valores
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            {[
+                                {
+                                    titulo: "Transparencia",
+                                    descripcion:
+                                        "Creemos en la verificación abierta y confiable de logros académicos.",
+                                },
+                                {
+                                    titulo: "Innovación",
+                                    descripcion:
+                                        "Buscamos soluciones tecnológicas simples para problemas complejos.",
+                                },
+                                {
+                                    titulo: "Inclusión",
+                                    descripcion:
+                                        "Trabajamos para que ninguna comunidad quede sin acceso a sus certificados.",
+                                },
+                            ].map((valor) => (
+                                <div
+                                    key={valor.titulo}
+                                    className="bg-white_primary rounded-xl p-6 shadow-sm text-center"
+                                >
+                                    <h3 className="text-lg font-bold text-blue_dark mb-2">
+                                        {valor.titulo}
+                                    </h3>
+                                    <p className="text-gray-500 text-sm">{valor.descripcion}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
             </main>
-            <Footer/>
-        </>
-    )
+            <Footer />
+        </div>
+    );
 }

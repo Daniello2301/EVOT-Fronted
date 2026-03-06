@@ -45,22 +45,19 @@ export const AuthProvider = ({ children }) => {
     // ============================================================
     // Logout
     // ============================================================
+    // En logout() dentro de AuthContext.jsx — simplificar:
     const logout = async () => {
         try {
-            // Intentamos invalidar el token en el backend para cerrar la sesión de forma segura
-            const token = localStorage.getItem('ACCESS_TOKEN');
-            if (token) await logoutService(token); // invalida tokenVersion en backend
+            await logoutService(); // ✅ el interceptor inyecta el token
         } catch (error) {
             // si falla el backend igual limpiamos localmente
         } finally {
-            // Limpiamos el token y la información del usuario del localStorage y del estado
             localStorage.removeItem('ACCESS_TOKEN');
             localStorage.removeItem('REFRESH_TOKEN');
             setAuthUser(null);
             setIsLoggedIn(false);
         }
     };
-
     // ============================================================
     // Refresh access token
     // ============================================================

@@ -1,34 +1,50 @@
-import CardUser from "../components/CardUser";
-import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import CardUser from "../components/CardUser";
+
+const equipo = [
+    {
+        id: 1,
+        nombre: "Daniel Lopera",
+        rol: "Frontend Developer",
+        linkedin: "https://linkedin.com",
+        github: "https://github.com",
+    },
+    {
+        id: 2,
+        nombre: "Nombre Apellido",
+        rol: "Backend Developer",
+        linkedin: "https://linkedin.com",
+    },
+    {
+        id: 3,
+        nombre: "Nombre Apellido",
+        rol: "UI/UX Designer",
+        instagram: "https://instagram.com",
+    },
+];
 
 export default function Team() {
     return (
-        <>
-            <Navbar/>
-            <main className="pt-[8rem]">
-                <section className="h-20 flex justify-center items-center">
-                    <h1 className=" text-4xl font-extrabold tracking-tight text-blue_dark text-center leading-none md:text-5xl xl:text-6xl"> Meet Our Team</h1>
+        <div className="flex flex-col min-h-screen">
+            <Navbar />
+            <main className="flex-1 pt-36 pb-16">
+                <section className="text-center mb-12 px-4">
+                    <h1 className="text-4xl font-extrabold tracking-tight text-blue_dark md:text-5xl">
+                        Nuestro Equipo
+                    </h1>
+                    <p className="text-gray-500 mt-4 max-w-xl mx-auto">
+                        Conoce a las personas detrás de Evot Project.
+                    </p>
                 </section>
-                <section className="w-full grid justify-center gap-5 grid-cols-3 ">
-                    <div className="max-w-lg flex items-center justify-center">
-                        <CardUser />
-                    </div>
-                    <div className="max-w-lg flex items-center justify-center">
-                        <CardUser />
-                    </div>
-                    <div className="max-w-lg flex items-center justify-center">
-                        <CardUser />
-                    </div>
-                    <div className="max-w-lg flex items-center justify-center">
-                        <CardUser />
-                    </div>
-                    <div className="max-w-lg flex items-center justify-center">
-                        <CardUser />
-                    </div>
+
+                <section className="max-w-screen-xl mx-auto px-4 flex flex-wrap justify-center gap-6">
+                    {equipo.map((miembro) => (
+                        <CardUser key={miembro.id} {...miembro} />
+                    ))}
                 </section>
             </main>
-            <Footer/>
-        </>
-    )
+            <Footer />
+        </div>
+    );
 }
