@@ -31,7 +31,7 @@ export default function () {
   return (
     <>
       <Navbar />
-      <main className="grid items-center justify-center w-full h-[100%] py-8">
+      <main className="grid items-center justify-center w-full h-full py-8">
         <h1 className="w-full mb-4 text-4xl font-extrabold tracking-tight text-blue_dark text-center leading-none md:text-5xl xl:text-6xl">
           Busca tú diplomas
         </h1>

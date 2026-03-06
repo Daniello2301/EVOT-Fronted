@@ -5,7 +5,7 @@ import Logo from '../assets/logo1.png'
 function Navbar() {
   return (
     <>
-      <nav className="bg-blue_dark fixed w-screen z-10">
+      <nav className="bg-blue_dark w-screen z-10">
         <div className="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl p-4">
           <Link to={"/"} className="flex gap-2 items-center w-auto overflow-hidden justify-center text-white_primary hover:underline">
             <img className="object-contain justify-center h-8 w-8" src={Logo} alt="" />
@@ -48,8 +48,8 @@ function Navbar() {
             </button>
           </div>
         </div>
-        <nav className="backdrop-blur-sm bg-white relative z-50">
-          <div className="max-w-screen-xl px-4 py-3 mx-auto">
+        <nav className="backdrop-blur-sm bg-white relative z-50 h-12">
+          <div className="max-w-screen-xl px-4 py-3 mx-auto place-items-center md:flex md:justify-between">
             <div className="flex items-center">
               <ul className="flex flex-row font-medium mt-0 mr-6 space-x-8 text-sm">
                 <li>

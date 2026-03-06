@@ -6,7 +6,7 @@ export default function About() {
     return (
         <div className="flex flex-col min-h-screen">
             <Navbar />
-            <main className="flex-1 pt-28">
+            <main className="flex-1 pt-1">
                 {/* Hero */}
                 <section
                     className="w-full h-64 flex items-center justify-center bg-cover bg-center relative"
