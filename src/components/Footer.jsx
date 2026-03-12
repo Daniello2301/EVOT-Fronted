@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-gray_primary">
+    <footer className="max-w-screen bg-gray_primary">
       <div className="p-4 md:flex md:items-center md:justify-between">
         <span className="text-sm text-gray-500 sm:text-center">
           © 2024 <Link to="/" className="hover:underline">Evot Project</Link>. All Rights Reserved.

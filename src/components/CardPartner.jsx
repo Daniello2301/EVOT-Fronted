@@ -4,13 +4,13 @@ export default function CardPartner({ partner }) {
             <div className="h-[100px] w-full flex items-center justify-center overflow-hidden rounded-lg bg-gray-50">
                 {partner?.logo
                     ? <img className="w-full h-full object-contain" src={partner.logo} alt={partner.nombreInstitucion} />
-                    : <span className="text-4xl font-bold text-blue_dark">
+                    : <span className="text-4xl font-bold text-blue_primary">
                         {partner?.nombreInstitucion?.charAt(0) ?? 'I'}
                     </span>
                 }
             </div>
             <div className="p-2 flex justify-center mt-1">
-                <h2 className="text-blue_dark text-center text-sm font-medium">
+                <h2 className="text-blue_primary text-center text-sm font-medium">
                     {partner?.nombreInstitucion ?? 'Institución'}
                 </h2>
             </div>

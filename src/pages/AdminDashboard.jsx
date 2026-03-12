@@ -10,7 +10,7 @@ import InstitutionsViewDashboard from "./InstitutionsViewDashboard";
 
 
 const AdminDashboard = () => {
-  const { authUser, isloggedIn } = useAuth();
+  const { authUser,  isloggedIn} = useAuth();
   
   const navigate = useNavigate();
 
@@ -18,11 +18,11 @@ const AdminDashboard = () => {
     localStorage.clear();
   }
 
-  useEffect(() => {
+  /* useEffect(() => {
     if (!isloggedIn) {
       navigate("/home")
     }
-  }, [])
+  }, []) */
 
 
   return (

@@ -18,7 +18,7 @@ export default function CardUser({
                 />
             </div>
             <div className="flex flex-col m-2">
-                <h2 className="text-xl text-blue_dark font-semibold">
+                <h2 className="text-xl text-blue_primary font-semibold">
                     {nombre || "Nombre"}
                 </h2>
                 <p className="text-gray-500 text-sm">{rol || "Rol"}</p>
@@ -29,11 +29,9 @@ export default function CardUser({
                         href={facebook}
                         target="_blank"
                         rel="noreferrer"
-                        className="h-8 w-8 p-1 hover:rounded-full hover:bg-blue_dark hover:text-white_primary flex items-center justify-center transition-colors"
+                        className="h-8 w-8 p-1 hover:rounded-full hover:bg-blue_primary hover:text-white_primary flex items-center justify-center transition-colors"
                     >
                         <svg
-                            width="auto"
-                            height="auto"
                             viewBox="0 0 24 24"
                             strokeWidth="1.5"
                             stroke="currentColor"
@@ -51,11 +49,11 @@ export default function CardUser({
                         href={linkedin}
                         target="_blank"
                         rel="noreferrer"
-                        className="h-8 w-8 p-1 hover:rounded-full hover:bg-blue_dark hover:text-white_primary flex items-center justify-center transition-colors"
+                        className="h-8 w-8 p-1 hover:rounded-full hover:bg-blue_primary hover:text-white_primary flex items-center justify-center transition-colors"
                     >
                         <svg
-                            width="auto"
-                            height="auto"
+
+
                             viewBox="0 0 24 24"
                             strokeWidth="1.5"
                             stroke="currentColor"
@@ -77,11 +75,11 @@ export default function CardUser({
                         href={instagram}
                         target="_blank"
                         rel="noreferrer"
-                        className="h-8 w-8 p-1 hover:rounded-full hover:bg-blue_dark hover:text-white_primary flex items-center justify-center transition-colors"
+                        className="h-8 w-8 p-1 hover:rounded-full hover:bg-blue_primary hover:text-white_primary flex items-center justify-center transition-colors"
                     >
                         <svg
-                            width="auto"
-                            height="auto"
+
+
                             viewBox="0 0 24 24"
                             strokeWidth="1.5"
                             stroke="currentColor"

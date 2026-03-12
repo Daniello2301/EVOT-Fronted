@@ -10,7 +10,7 @@ export default function NavDashboard() {
   };
 
   return (
-    <nav className="bg-blue_dark border-b border-blue_dark px-4 py-2.5 fixed left-0 right-0 top-0 z-50">
+    <nav className="bg-blue_primary border-b border-blue_primary px-4 py-2.5 fixed left-0 right-0 top-0 z-50">
       <div className="flex flex-wrap justify-between items-center">
 
         {/* Logo */}
@@ -19,7 +19,7 @@ export default function NavDashboard() {
             data-drawer-target="drawer-navigation"
             data-drawer-toggle="drawer-navigation"
             aria-controls="drawer-navigation"
-            className="p-2 mr-2 text-white_primary rounded-lg cursor-pointer md:hidden hover:text-blue_dark hover:bg-gray-100 focus:bg-gray-100 focus:ring-2 focus:ring-gray-100 focus:text-blue_dark"
+            className="p-2 mr-2 text-white_primary rounded-lg cursor-pointer md:hidden hover:text-blue_primary hover:bg-gray-100 focus:bg-gray-100 focus:ring-2 focus:ring-gray-100 focus:text-blue_primary"
           >
             <svg aria-hidden="true" className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
@@ -61,7 +61,7 @@ export default function NavDashboard() {
           <button
             onClick={handleLogout}
             title="Cerrar sesión"
-            className="p-3 block text-sm text-white_primary hover:bg-gray-100 hover:text-blue_dark hover:rounded-md transition-colors"
+            className="p-3 block text-sm text-white_primary hover:bg-gray-100 hover:text-blue_primary hover:rounded-md transition-colors"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
