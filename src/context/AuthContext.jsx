@@ -25,6 +25,7 @@ export const AuthProvider = ({ children }) => {
     const login = async (correo, contraseña) => {
         const data = await loginService({ correo, contraseña });
 
+        console.log("Respuesta del login:", data); // ✅ Log para verificar la respuesta del backend
         // Extraemos el token, refresh token y la información del usuario del response del backend
         const token = data.usuario.tokens.token;
         // El refresh token también viene en la respuesta del backend, lo extraemos para guardarlo en localStorage
@@ -91,26 +92,23 @@ export const AuthProvider = ({ children }) => {
     // Inicializar sesión al montar la app
     // ============================================================
     useEffect(() => {
-        // Función para verificar si hay un refresh token válido al cargar la aplicación y refrescar el access token
-        const initializeAuth = async () => {
-            try {
-                await logoutService();
-            } catch (error) {
-                // si falla el backend igual limpiamos
-            } finally {
-                localStorage.removeItem("ACCESS_TOKEN");
-                localStorage.removeItem("REFRESH_TOKEN");
-                localStorage.removeItem("USER"); // ✅ limpiar usuario
-                localStorage.clear();
-                setAuthUser(null);
-                setIsLoggedIn(false);
+        try {
+            const storedUser = localStorage.getItem("USER");
+            const accessToken = localStorage.getItem("ACCESS_TOKEN");
+
+            if (storedUser && accessToken) {
+                const usuario = JSON.parse(storedUser);
+                setAuthUser({ ...usuario, accessToken });
+                setIsLoggedIn(true);
             }
-
-            setLoading(false);
-        };
-
-        // Llamamos a la función de inicialización de autenticación al montar el componente
-        initializeAuth();
+        } catch (error) {
+            localStorage.removeItem("USER"); // ← limpia datos corruptos
+            localStorage.removeItem("ACCESS_TOKEN");
+            setAuthUser(null);
+            setIsLoggedIn(false);
+        } finally {
+            setLoading(false); // ← SIEMPRE se ejecuta
+        }
     }, []);
 
     return (
