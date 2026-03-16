@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "../components/AsideDashBoard";
-import Navbar from "../components/Navbar";
+import NavDashboard from "../components/NavDashboard";
 
 export default function DashboardLayout() {
     return (
@@ -13,7 +13,7 @@ export default function DashboardLayout() {
             <div className="flex flex-col flex-1">
 
                 {/* Navbar */}
-                <Navbar />
+                <NavDashboard />
 
                 {/* Main */}
                 <main className="flex-1 overflow-y-auto p-6 bg-gray-50">

@@ -5,6 +5,9 @@ import {
     refreshTokenService,
 } from "../services/auth.service";
 
+import { jwtDecode } from "jwt-decode";
+import { setupInterceptors } from "../helpers/axiosInterceptor";
+
 const AuthContext = createContext();
 
 // Custom hook para usar el contexto de autenticación
@@ -19,10 +22,13 @@ export const AuthProvider = ({ children }) => {
     // Estado para indicar si se está cargando la autenticación (útil para mostrar un spinner mientras se verifica el token)
     const [loading, setLoading] = useState(true);
 
+    const [token, setToken] = useState(null);
+
     // ============================================================
     // Login
     // ============================================================
     const login = async (correo, contraseña) => {
+
         const data = await loginService({ correo, contraseña });
 
         console.log("Respuesta del login:", data); // ✅ Log para verificar la respuesta del backend
@@ -30,20 +36,23 @@ export const AuthProvider = ({ children }) => {
         const token = data.usuario.tokens.token;
         // El refresh token también viene en la respuesta del backend, lo extraemos para guardarlo en localStorage
         const refreshToken = data.usuario.tokens.refreshToken;
+
+        //decode token para obtener la información del usuario
+        const decodedToken = jwtDecode(token);
+        console.log("Decoded Token:", decodedToken); // ✅ Log para verificar el contenido del token decodificado
         // Creamos un objeto con la información del usuario que queremos guardar en el estado y localStorage
         const usuario = {
-            _id: data.usuario._id,
-            nombreUsuario: data.usuario.nombreUsuario,
-            correo: data.usuario.correo,
-            rol: data.usuario.rol,
-            institucion: data.usuario.institucion,
+            _id: decodedToken._id,
+            nombreUsuario: decodedToken.nombreUsuario,
+            correo: decodedToken.correo,
+            rol: decodedToken.rol,
+            institucion: decodedToken.institucion,
         };
 
-        localStorage.setItem("ACCESS_TOKEN", token);
         localStorage.setItem("REFRESH_TOKEN", refreshToken);
-        localStorage.setItem("USER", JSON.stringify(usuario)); // ✅ guardar usuario
 
-        setAuthUser({ ...usuario, accessToken: token });
+        setAuthUser(usuario);
+        setToken(token);
         setIsLoggedIn(true);
     };
 
@@ -57,9 +66,9 @@ export const AuthProvider = ({ children }) => {
         } catch (error) {
             // si falla el backend igual limpiamos localmente
         } finally {
-            localStorage.removeItem("ACCESS_TOKEN");
             localStorage.removeItem("REFRESH_TOKEN");
             setAuthUser(null);
+            setToken(null);
             setIsLoggedIn(false);
         }
     };
@@ -74,12 +83,18 @@ export const AuthProvider = ({ children }) => {
             const data = await refreshTokenService(refreshToken);
             const newToken = data.token;
 
-            // ✅ Reconstruir authUser desde localStorage
-            const usuario = JSON.parse(localStorage.getItem("USER"));
+            const decodedToken = jwtDecode(newToken);
 
-            localStorage.setItem("ACCESS_TOKEN", newToken);
-            setAuthUser({ ...usuario, accessToken: newToken });
-            setIsLoggedIn(true);
+            const usuario = {
+                _id: decodedToken._id,
+                nombreUsuario: decodedToken.nombreUsuario,
+                correo: decodedToken.correo,
+                rol: decodedToken.rol,
+                institucion: decodedToken.institucion,
+            }
+
+            setAuthUser(usuario);
+            setToken(newToken);
 
             return newToken;
         } catch (error) {
@@ -88,27 +103,38 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+
     // ============================================================
-    // Inicializar sesión al montar la app
+    // Axios Interceptors
+    // ============================================================
+
+    useEffect(() => {
+
+        setupInterceptors({
+            getAccessToken: () => token,
+            refreshToken: refreshAccessToken,
+            logout
+        });
+
+    }, [token]);
+
+
+    // ============================================================
+    // Recuperar sesión al cargar la aplicación
     // ============================================================
     useEffect(() => {
-        try {
-            const storedUser = localStorage.getItem("USER");
-            const accessToken = localStorage.getItem("ACCESS_TOKEN");
+        
+        const initializeAuth = async () => {
 
-            if (storedUser && accessToken) {
-                const usuario = JSON.parse(storedUser);
-                setAuthUser({ ...usuario, accessToken });
-                setIsLoggedIn(true);
+            const refreshToken = localStorage.getItem("REFRESH_TOKEN");
+            if (refreshToken) {
+                const newToken = await refreshAccessToken();
             }
-        } catch (error) {
-            localStorage.removeItem("USER"); // ← limpia datos corruptos
-            localStorage.removeItem("ACCESS_TOKEN");
-            setAuthUser(null);
-            setIsLoggedIn(false);
-        } finally {
-            setLoading(false); // ← SIEMPRE se ejecuta
-        }
+            setLoading(false); // Indicamos que ya no estamos cargando la autenticación, independientemente de si se pudo recuperar la sesión o no
+
+        };
+
+        initializeAuth();
     }, []);
 
     return (
@@ -116,13 +142,11 @@ export const AuthProvider = ({ children }) => {
         <AuthContext.Provider
             value={{
                 authUser,
-                setAuthUser,
+                token,
                 isLoggedIn,
-                setIsLoggedIn,
                 login,
                 logout,
-                refreshAccessToken,
-                loading,
+                loading
             }}
         >
             {children}
