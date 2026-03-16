@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import {
     loginService,
     logoutService,
@@ -23,6 +23,8 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     const [token, setToken] = useState(null);
+
+    const tokenRef = useRef(null);
 
     // ============================================================
     // Login
@@ -80,7 +82,16 @@ export const AuthProvider = ({ children }) => {
             const refreshToken = localStorage.getItem("REFRESH_TOKEN");
             if (!refreshToken) return null;
 
-            const data = await refreshTokenService(refreshToken);
+            // ✅ Timeout de 10s para no quedarse colgado indefinidamente
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("Timeout al refrescar token")), 10000)
+            );
+
+            const data = await Promise.race([
+                refreshTokenService(refreshToken),
+                timeoutPromise
+            ]);
+
             const newToken = data.token;
 
             const decodedToken = jwtDecode(newToken);
@@ -95,35 +106,39 @@ export const AuthProvider = ({ children }) => {
 
             setAuthUser(usuario);
             setToken(newToken);
-
+            setIsLoggedIn(true);
             return newToken;
+
         } catch (error) {
-            await logout();
+            console.error("Error al refrescar token:", error.message);
+            await logout(); // ✅ Se mantiene — logout tiene su propio finally que garantiza la limpieza
             return null;
         }
     };
 
+
+    useEffect(() => {
+        tokenRef.current = token;
+    }, [token]);
 
     // ============================================================
     // Axios Interceptors
     // ============================================================
 
     useEffect(() => {
-
         setupInterceptors({
-            getAccessToken: () => token,
+            getAccessToken: () => tokenRef.current,
             refreshToken: refreshAccessToken,
             logout
         });
-
-    }, [token]);
+    }, []);
 
 
     // ============================================================
     // Recuperar sesión al cargar la aplicación
     // ============================================================
     useEffect(() => {
-        
+
         const initializeAuth = async () => {
 
             const refreshToken = localStorage.getItem("REFRESH_TOKEN");
