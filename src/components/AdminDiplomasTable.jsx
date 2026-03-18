@@ -37,31 +37,31 @@ function AdminDiplomasTable({ props }) {
   console.log(props.diplomas);
   return (
     <>
-      <table class="w-full text-sm text-left text-gray-500 ">
-        <thead class="text-xs text-gray-700 uppercase bg-gray-50 ">
+      <table className="w-full text-sm text-left text-gray-500 ">
+        <thead className="text-xs text-gray-700 uppercase bg-gray-50 ">
           <tr>
-            <th scope="col" class="px-4 py-4">
+            <th scope="col" className="px-4 py-4">
               Codigo Diploma
             </th>
-            <th scope="col" class="px-4 py-3">
+            <th scope="col" className="px-4 py-3">
               Fecha
             </th>
-            <th scope="col" class="px-4 py-3">
+            <th scope="col" className="px-4 py-3">
               Documento del Graduado
             </th>
-            <th scope="col" class="px-4 py-3">
+            <th scope="col" className="px-4 py-3">
               Nombre del Graduado
             </th>
-            <th scope="col" class="px-4 py-3">
+            <th scope="col" className="px-4 py-3">
               Institucion
             </th>
-            <th scope="col" class="px-4 py-3">
+            <th scope="col" className="px-4 py-3">
               Nivel
             </th>
-            <th scope="col" class="px-4 py-3">
+            <th scope="col" className="px-4 py-3">
               Titulo
             </th>
-            <th scope="col" class="px-4 py-3">
+            <th scope="col" className="px-4 py-3">
               Actions
             </th>
           </tr>
@@ -70,25 +70,25 @@ function AdminDiplomasTable({ props }) {
           {props.diplomas.map((diploma) => {
             return (
               <>
-                <tr class="border-b dark:border-gray-700">
+                <tr className="border-b dark:border-gray-700">
                   <th
                     scope="row"
-                    class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                    className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white"
                   >
                     {diploma.codigoDiploma}
                   </th>
-                  <td class="px-4 py-3"> {new Date(diploma.fechaGrados).toDateString()} </td>
-                  <td class="px-4 py-3">  {diploma?.graduado.cedula} </td>
-                  <td class="px-4 py-3 max-w-[12rem] truncate"> {diploma?.graduado.nombreCompleto} </td>
-                  <td class="px-4 py-3"> {diploma?.institucion.nombreInstitucion} </td>
-                  <td class="px-4 py-3"> {diploma.nivelPrograma} </td>
-                  <td class="px-4 py-3"> {diploma.nombrePrograma} </td>
-                  <td class="px-4 py-3 flex items-center justify-end">  
+                  <td className="px-4 py-3"> {new Date(diploma.fechaGrados).toDateString()} </td>
+                  <td className="px-4 py-3">  {diploma?.graduado.cedula} </td>
+                  <td className="px-4 py-3 max-w-[12rem] truncate"> {diploma?.graduado.nombreCompleto} </td>
+                  <td className="px-4 py-3"> {diploma?.institucion.nombreInstitucion} </td>
+                  <td className="px-4 py-3"> {diploma.nivelPrograma} </td>
+                  <td className="px-4 py-3"> {diploma.nombrePrograma} </td>
+                  <td className="px-4 py-3 flex items-center justify-end">  
                     <Dropdown
                       placement="left"
                       renderTrigger={() => (
                         <svg
-                          class="w-5 h-5"
+                          className="w-5 h-5"
                           aria-hidden="true"
                           fill="currentColor"
                           viewbox="0 0 20 20"
@@ -105,10 +105,10 @@ function AdminDiplomasTable({ props }) {
                             props.setOpenModalEditDiploma("openModalEdit");
                             getDiploma(diploma?._id);
                           }}
-                          class="flex w-full items-center py-2 px-4 hover:bg-gray-100 text-gray-700 "
+                          className="flex w-full items-center py-2 px-4 hover:bg-gray-100 text-gray-700 "
                         >
                           <svg
-                            class="w-4 h-4 mr-2"
+                            className="w-4 h-4 mr-2"
                             xmlns="http://www.w3.org/2000/svg"
                             viewbox="0 0 20 20"
                             fill="currentColor"
@@ -132,10 +132,10 @@ function AdminDiplomasTable({ props }) {
                               "openModalPreview"
                             );
                           }}
-                          class="flex w-full items-center py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white text-gray-700 dark:text-gray-200"
+                          className="flex w-full items-center py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white text-gray-700 dark:text-gray-200"
                         >
                           <svg
-                            class="w-4 h-4 mr-2"
+                            className="w-4 h-4 mr-2"
                             viewbox="0 0 20 20"
                             fill="currentColor"
                             aria-hidden="true"
@@ -156,10 +156,10 @@ function AdminDiplomasTable({ props }) {
                           onClick={() =>
                             props.setOpenModalDeleteDiploma("openModalDelete")
                           }
-                          class="flex w-full items-center py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 text-red-500 dark:hover:text-red-400"
+                          className="flex w-full items-center py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 text-red-500 dark:hover:text-red-400"
                         >
                           <svg
-                            class="w-4 h-4 mr-2"
+                            className="w-4 h-4 mr-2"
                             viewbox="0 0 14 15"
                             fill="none"
                             xmlns="http://www.w3.org/2000/svg"

@@ -35,11 +35,11 @@ const AdminDashboard = () => {
           )
           :
           (
-            <div class="antialiased bg-gray-50 dark:bg-gray-900">
+            <div className="antialiased bg-gray-50 dark:bg-gray-900">
               <NavDashboard />
               <AsideDashboard />
-              <main class="md:ml-64 h-auto pt-20">
-                <div class="grid grid-cols-1 mb-4">
+              <main className="md:ml-64 h-auto pt-20">
+                <div className="grid grid-cols-1 mb-4">
 
                   <Routes>
                     <Route path="institutions" element={<InstitutionsViewDashboard />} />{/* 

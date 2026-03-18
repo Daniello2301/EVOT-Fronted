@@ -7,13 +7,92 @@ import { gooeyToast, GooeyToaster } from "goey-toast";
 export default function () {
 
   const [document, setDocument] = useState(0);
-  const [diplomas, setDiplomas] = useState([]);
+  const [diplomas, setDiplomas] = useState(
+    [
+    {
+      _id: '69bac7f19d0e8757812278f0',
+      codigoDiploma: 'DIP-DS-2023-056',
+      nombrePrograma: 'Tecnología en Desarrollo de Software',
+      nivelPrograma: 'Tecnología',
+      registroPrograma: 'REG-DS-330',
+      libro: 'Acta 2023-I',
+      fechaGrados: '2023-06-30T00:00:00.000Z',
+      graduado: {
+        _id: '69bac70f9d0e8757812278db',
+        numeroDocumento: '100200300',
+        nombres: 'Tomas',
+        apellidos: 'Hernandez'
+      },
+      institucion: {
+        _id: '69bac53c9d0e8757812278c6',
+        codigoInstitucion: 1010,
+        nombreInstitucion: 'Laboratorio de Pruebas EVOT',
+        ciudad: 'Medellin',
+        departamento: 'Antioquia'
+      },
+      estado: true,
+      createdAt: '2026-03-18T15:42:41.606Z',
+      updatedAt: '2026-03-18T15:42:41.606Z'
+    },
+    {
+      _id: '69bac7e09d0e8757812278eb',
+      codigoDiploma: 'DIP-IND-2022-077',
+      nombrePrograma: 'Ingeniería Industrial',
+      nivelPrograma: 'Pregrado',
+      registroPrograma: 'REG-IND-210',
+      libro: 'Acta 2022-II',
+      fechaGrados: '2022-12-02T00:00:00.000Z',
+      graduado: {
+        _id: '69bac70f9d0e8757812278db',
+        numeroDocumento: '100200300',
+        nombres: 'Tomas',
+        apellidos: 'Hernandez'
+      },
+      institucion: {
+        _id: '69bac53c9d0e8757812278c6',
+        codigoInstitucion: 1010,
+        nombreInstitucion: 'Laboratorio de Pruebas EVOT',
+        ciudad: 'Medellin',
+        departamento: 'Antioquia'
+      },
+      estado: true,
+      createdAt: '2026-03-18T15:42:24.365Z',
+      updatedAt: '2026-03-18T15:42:24.365Z'
+    },
+    {
+      _id: '69bac7c79d0e8757812278e6',
+      codigoDiploma: 'DIP-IST-2024-001',
+      nombrePrograma: 'Ingeniería de Sistemas',
+      nivelPrograma: 'Pregrado',
+      registroPrograma: 'REG-IST-001',
+      libro: 'Acta 2024-I',
+      fechaGrados: '2024-05-10T00:00:00.000Z',
+      graduado: {
+        _id: '69bac70f9d0e8757812278db',
+        numeroDocumento: '100200300',
+        nombres: 'Tomas',
+        apellidos: 'Hernandez'
+      },
+      institucion: {
+        _id: '69bac53c9d0e8757812278c6',
+        codigoInstitucion: 1010,
+        nombreInstitucion: 'Laboratorio de Pruebas EVOT',
+        ciudad: 'Medellin',
+        departamento: 'Antioquia'
+      },
+      estado: true,
+      createdAt: '2026-03-18T15:41:59.066Z',
+      updatedAt: '2026-03-18T15:41:59.066Z'
+    }
+  ]
+  );
 
   const getDiplomas = async (e) => {
     e.preventDefault();
     try {
       const response = await API.getDiplomasByGraduate(document);
-      setDiplomas(response?.data)
+      console.log(response?.results);
+      setDiplomas(response?.results)
     } catch (error) {
       gooeyToast.error(error?.response?.data?.msg || "Error");
     }

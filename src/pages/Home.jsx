@@ -181,9 +181,9 @@ const CTA = () => (
       <div className="flex flex-wrap justify-center gap-4">
         <Link
           to="/search/diploma"
-          class="group relative text-blue_primary bg-white_primary inline-flex h-12 items-center justify-center overflow-hidden rounded-md  px-6 font-medium  border-white_primary border "
+          className="group relative text-blue_primary bg-white_primary inline-flex h-12 items-center justify-center overflow-hidden rounded-md  px-6 font-medium  border-white_primary border "
         >
-          <div class="mr-0 w-0 -translate-x-[100%] opacity-0 transition-all duration-200 group-hover:mr-1 group-hover:w-5 group-hover:translate-x-0 group-hover:opacity-100">
+          <div className="mr-0 w-0 -translate-x-[100%] opacity-0 transition-all duration-200 group-hover:mr-1 group-hover:w-5 group-hover:translate-x-0 group-hover:opacity-100">
             <svg
               aria-hidden="true"
               xmlns="http://www.w3.org/2000/svg"
@@ -194,8 +194,8 @@ const CTA = () => (
             >
               <path
                 stroke="currentColor"
-                stroke-linecap="round"
-                stroke-width="2"
+                strokeLinecap="round"
+                strokeWidth="2"
                 d="m21 21-3.5-3.5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"
               />
             </svg>
