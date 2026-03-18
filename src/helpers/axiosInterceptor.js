@@ -36,6 +36,11 @@ export const setupInterceptors = ({
 
             const originalRequest = error.config;
 
+            if (originalRequest.url.includes('auth/refresh') ||
+            originalRequest.url.includes('auth/logout')) {
+            return Promise.reject(error);
+            }
+
             if (error.response?.status !== 401) {
                 return Promise.reject(error);
             }
