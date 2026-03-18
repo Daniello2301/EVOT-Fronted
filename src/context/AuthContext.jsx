@@ -64,7 +64,9 @@ export const AuthProvider = ({ children }) => {
     // En logout() dentro de AuthContext.jsx — simplificar:
     const logout = async () => {
         try {
-            await logoutService(); // ✅ el interceptor inyecta el token
+            if (callBackend && tokenRef.current) {
+                await logoutService();
+            } 
         } catch (error) {
             // si falla el backend igual limpiamos localmente
         } finally {
@@ -110,8 +112,7 @@ export const AuthProvider = ({ children }) => {
             return newToken;
 
         } catch (error) {
-            console.error("Error al refrescar token:", error.message);
-            await logout(); // ✅ Se mantiene — logout tiene su propio finally que garantiza la limpieza
+            await logout(false); // ✅ Se mantiene — logout tiene su propio finally que garantiza la limpieza
             return null;
         }
     };
