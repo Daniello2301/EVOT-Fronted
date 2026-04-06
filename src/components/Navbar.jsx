@@ -1,8 +1,17 @@
 import { Link } from 'react-router-dom'
 
 import Logo from '../assets/logo1.png'
+import { useAuth } from '../context/AuthContext';
+
+
 
 function Navbar() {
+  const { authUser, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout(); // llama al backend y limpia localStorage
+  };
+
   return (
     <>
       <nav className="bg-blue_primary max-w-screen z-10">
@@ -15,13 +24,42 @@ function Navbar() {
           </Link>
 
           <div className="flex items-center">
-            <Link
-              to={`/login`}
-              className="py-2 px-2 bg-white_primary rounded-lg text-l text-blue_dark font-semibold transition delay-75 duration-300 ease-in-out hover:scale-105"
-            >
-              Login
-            </Link>
-            
+
+            {
+              authUser ?
+                (
+                  <>
+                  <div className="flex items-center justify-start">
+                      <p className="text-white_primary text-l font-semibold px-2 text-center">
+                        Hola, {authUser.nombreUsuario}
+                      </p>
+                      <button
+                        onClick={handleLogout}
+                        title="Cerrar sesión"
+                        className="p-2 block text-sm rounded-md text-white_primary hover:bg-gray-100 hover:text-blue_primary hover:rounded-md transition-colors"
+                      >
+                        <svg width="20" height="20" viewBox="0 0 20 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                          <path d="M10 8v-2a2 2 0 0 1 2 -2h7a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-7a2 2 0 0 1 -2 -2v-2" />
+                          <path d="M15 12h-12l3 -3" />
+                          <path d="M6 15l-3 -3" />
+                        </svg>
+                      </button>
+                  </div>
+                  </>
+                )
+                :
+
+                (
+                  <Link
+                    to={`/login`}
+                    className="py-2 px-2 bg-white_primary rounded-lg text-l text-blue_dark font-semibold transition delay-75 duration-300 ease-in-out hover:scale-105"
+                  >
+                    Login
+                  </Link>
+                )
+            }
+
             <button
               data-collapse-toggle="navbar-user"
               type="button"

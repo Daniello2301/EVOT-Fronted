@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { solicitarDocumento } from '../services/diplomas.service';
+import { useAuth } from '../context/AuthContext';
 
 export default function SolicitarDocumentoModal({ diploma, onClose }) {
+    const { authUser } = useAuth(); // Get the logged-in user's information
     const [form, setForm] = useState({
         nombres: '',
         apellidos: '',
@@ -11,6 +13,16 @@ export default function SolicitarDocumentoModal({ diploma, onClose }) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
+
+    useEffect(() => {
+        if (authUser) {
+            setForm({
+                ...form,
+                correoSolicitante: authUser.correo || ''
+            });
+        }
+    }, [authUser]);
+
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });

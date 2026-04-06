@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 function Login() {
-  const { login } = useAuth();
+  const { login, recuperarEstadoPendiente, limpiarEstadoPendiente } = useAuth();
   const navigate = useNavigate();
 
   const [correo, setCorreo] = useState("");
@@ -17,8 +17,17 @@ function Login() {
     setLoading(true);
 
     try {
-      await login(correo, contraseña);
-      navigate("/admin-dashboard");
+      // Llamamos a la función de login del contexto de autenticación, que se encargará de hacer la llamada al backend, guardar el token y la información del usuario en el estado global, y devolver el estado pendiente (si es que hay uno guardado)
+      const estadoPendiente = await login(correo, contraseña);
+
+      // Si hay un estado pendiente guardado, redirigimos al usuario a la página que intentaba acceder originalmente
+      if (estadoPendiente) {
+        // Redirigimos al usuario a la URL que intentaba acceder originalmente, que está guardada en el estado pendiente
+        navigate(estadoPendiente.url);
+      }else {
+        // Si no hay un estado pendiente, redirigimos al usuario a la página de admin-dashboard por defecto después de iniciar sesión
+        navigate("/admin-dashboard");
+      }
     } catch (err) {
       const msg = err.response?.data?.msg || "Correo o contraseña incorrecta";
       setError(msg);
@@ -26,6 +35,14 @@ function Login() {
       setLoading(false);
     }
   };
+
+  const handleGoToRegister = (e) => {
+    // Evitamos que el enlace realice su comportamiento por defecto de recargar la página
+    e.preventDefault();
+
+    // Redirigimos al usuario a la página de registro de estudiantes
+    navigate("/student-register");
+  }
 
   return (
     <div className="flex items-center justify-center flex-1 py-12 px-4 ">
@@ -86,6 +103,19 @@ function Login() {
             >
               {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
             </button>
+
+            {/* Login Estudiante */}
+            <div className="text-sm font-medium text-gray-500">
+              ¿Eres estudiante?{" "}
+              <a
+                href="/student-register"
+                className="text-blue-600 hover:underline"
+                onClick={handleGoToRegister}
+              >
+                Registrarse aquí  
+              </a>
+            </div>
+
           </form>
         </div>
       </div>

@@ -24,7 +24,27 @@ export const AuthProvider = ({ children }) => {
 
     const [token, setToken] = useState(null);
 
+    const [estadoPendiente, setEstadoPendiente] = useState(null);
+
     const tokenRef = useRef(null);
+
+    
+    const guardarEstadoPendiente = (estado) => {
+        setEstadoPendiente(estado);
+        sessionStorage.setItem('estadoPendiente', JSON.stringify(estado));
+    };
+
+    
+    const recuperarEstadoPendiente = () => {
+        const estadoGuardado = sessionStorage.getItem('estadoPendiente');
+        return estadoGuardado ? JSON.parse(estadoGuardado) : null;
+    };
+
+    
+    const limpiarEstadoPendiente = () => {
+        setEstadoPendiente(null);
+        sessionStorage.removeItem('estadoPendiente');
+    };
 
     // ============================================================
     // Login
@@ -56,6 +76,8 @@ export const AuthProvider = ({ children }) => {
         setAuthUser(usuario);
         setToken(token);
         setIsLoggedIn(true);
+
+        return recuperarEstadoPendiente(); // Devolvemos el estado pendiente para que el componente que llamó a login pueda redirigir al usuario a la página que intentaba acceder originalmente
     };
 
     // ============================================================
@@ -71,6 +93,7 @@ export const AuthProvider = ({ children }) => {
             // si falla el backend igual limpiamos localmente
         } finally {
             localStorage.removeItem("REFRESH_TOKEN");
+            limpiarEstadoPendiente(); // Limpiamos el estado pendiente al hacer logout, ya que el usuario ya no tiene sentido que sea redirigido a una página protegida después de cerrar sesión
             setAuthUser(null);
             setToken(null);
             setIsLoggedIn(false);
@@ -162,7 +185,10 @@ export const AuthProvider = ({ children }) => {
                 isLoggedIn,
                 login,
                 logout,
-                loading
+                loading,
+                guardarEstadoPendiente,
+                recuperarEstadoPendiente,
+                limpiarEstadoPendiente,
             }}
         >
             {children}

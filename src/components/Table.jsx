@@ -1,16 +1,56 @@
 import { useEffect, useState } from "react";
 import SolicitarDocumentoModal from "./SolicitarDocumentoModal";
+import { useAuth } from "../context/AuthContext";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export default function ({ ...props }) {
   const [data, setData] = useState([]);
 
   const [diplomaSeleccionado, setDiplomaSeleccionado] = useState(null);
 
-  const columnas = ['Título', 'Nivel', 'Libro', 'Fecha', 'Institución', 'Documento'];
+  const { isLoggedIn, guardarEstadoPendiente, recuperarEstadoPendiente, limpiarEstadoPendiente } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const columnas = ['Título', 'Nivel', 'Libro', 'Fecha', 'Institución', 'Acciones'];
 
   useEffect(() => {
+
+    // Si el usuario no está autenticado, guardamos el estado pendiente (la página que intentaba acceder) y redirigimos al usuario a la página de login
+    const estadoPendiente = recuperarEstadoPendiente();
+
+    if (estadoPendiente && isLoggedIn) {
+      // Si hay un estado pendiente guardado y el usuario ya está autenticado, redirigimos al usuario a la página que intentaba acceder originalmente
+      setDiplomaSeleccionado(estadoPendiente.diploma);
+
+      // Limpiamos el estado pendiente después de usarlo, para evitar redirecciones no deseadas en el futuro
+      limpiarEstadoPendiente();
+
+    }
+
     setData(props.diplomas);
-  }, [props]);
+  }, [props, isLoggedIn]);
+
+  const handleSolicitar = (diploma) => {
+    // Validar si está logueado
+    if (!isLoggedIn) {
+      // Guardar el diploma y la URL actual
+      guardarEstadoPendiente({
+        diploma: diploma,
+        url: window.location.pathname,
+        accion: 'solicitar_diploma',
+        timestamp: new Date().toISOString()
+      });
+
+      // Redirigir al login
+      navigate('/login');
+      return;
+    }
+
+    // Si está logueado, proceder normalmente
+    setDiplomaSeleccionado(diploma);
+  };
+
   return (
     <>
       <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -64,7 +104,7 @@ export default function ({ ...props }) {
                     </td>
                     <td className="px-6 py-4">
                       <button
-                        onClick={() => setDiplomaSeleccionado(diploma)}
+                        onClick={() => handleSolicitar(diploma)}
                         className="text-white bg-blue_primary hover:bg-blue_dark transition-colors text-xs font-medium px-3 py-1.5 rounded-lg"
                       >
                         Solicitar

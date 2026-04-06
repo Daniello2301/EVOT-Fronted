@@ -57,7 +57,7 @@ export default function NavDashboard() {
             {authUser?.rol ?? ''}
           </span>
 
-          {/* Logout */}
+          {/* Logout */} 
           <button
             onClick={handleLogout}
             title="Cerrar sesión"

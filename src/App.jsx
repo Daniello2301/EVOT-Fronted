@@ -11,6 +11,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import LoginPage from "./pages/LoginPage";
 import { InsitutionsProvider } from "./context/InstitutionsContext";
 import { PrivateRoute, RoleRoute, PublicOnlyRoute } from "./routes/PrivateRoute";
+import StudentRegister from "./components/StudenRegisterForm";
 
 function App() {
 
@@ -32,6 +33,7 @@ function App() {
         {/* Login solo si no está autenticado */}
         <Route element={<PublicOnlyRoute />}>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/student-register" element={<StudentRegister />} />
         </Route>
 
       </Route>
