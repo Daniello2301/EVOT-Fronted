@@ -1,6 +1,4 @@
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
-import aboutImg from "../assets/about.jpg";
+import aboutImg from "../assets/about.svg";
 
 export default function About() {
     return (

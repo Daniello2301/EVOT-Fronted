@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { registerStudent } from "../services/usuarios.service";
 
 function StudentRegister() {
     const { login, recuperarEstadoPendiente } = useAuth();
@@ -36,16 +37,15 @@ function StudentRegister() {
         }
 
         try {
+            const newStudent = {
+                numeroDocumento: formData.numeroDocumento,
+                nombreUsuario: formData.nombreUsuario,
+                correo: formData.correo,
+                contraseña: formData.contraseña
+            };
+
             // 1. Registrar al usuario
-            const response = await fetch('tu-api/registro', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    nombreUsuario: formData.nombreUsuario,
-                    correo: formData.correo,
-                    contraseña: formData.contraseña
-                })
-            });
+            const response = await registerStudent(newStudent);
 
             if (!response.ok) {
                 const data = await response.json();
@@ -65,7 +65,8 @@ function StudentRegister() {
             }
 
         } catch (err) {
-            setError(err.message || "Error al registrarse");
+            setError(err?.response?.data?.msg || "Error al registrarse");
+
         } finally {
             setLoading(false);
         }

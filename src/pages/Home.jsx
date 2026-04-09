@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
+import heroImage from "../assets/hero.svg";
+
 // ============================================================
 // Sección Hero
 // ============================================================
@@ -50,7 +52,7 @@ const Hero = () => (
       <div className="hidden lg:flex lg:col-span-5 items-center justify-center">
         <img
           className="w-3/4 h-full object-contain rounded-xl"
-          src="https://images.unsplash.com/photo-1627556704302-624286467c65?ixlib=rb-4.0.3&auto=format&fit=crop&w=1974&q=80"
+          src={heroImage}
           alt="Verificación de diplomas"
         />
       </div>

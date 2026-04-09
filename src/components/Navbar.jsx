@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-import Logo from '../assets/logo1.png'
+import Logo from '../assets/logo1.webp'
 import { useAuth } from '../context/AuthContext';
 
 
@@ -18,7 +18,7 @@ function Navbar() {
         <div className="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl p-4">
           <Link to={"/"} className="flex gap-2 items-center w-auto overflow-hidden justify-center text-white_primary hover:underline">
             <img className="object-contain justify-center h-8 w-8" src={Logo} alt="" />
-            <span className="self-center text-2xl font-semibold whitespace-nowrap tracking-tight dark:text-[#252525">
+            <span className="self-center text-2xl font-semibold whitespace-nowrap tracking-tight dark:text-[#252525]">
               Evot Project
             </span>
           </Link>
@@ -47,7 +47,7 @@ function Navbar() {
                       </button>
                   </div>
                   </>
-                )
+                ) 
                 :
 
                 (
@@ -58,6 +58,16 @@ function Navbar() {
                     Login
                   </Link>
                 )
+            }
+            {
+              authUser?.rol === 'ADMIN' || authUser?.rol === 'INSTITUCION' && (
+                <Link
+                  to={`/admin-dashboard`}
+                  className="ml-4 py-2 px-2 bg-white_primary rounded-lg text-l text-blue_dark font-semibold transition delay-75 duration-300 ease-in-out hover:scale-105"
+                >
+                  Dashboard
+                </Link>
+              )
             }
 
             <button
@@ -93,16 +103,16 @@ function Navbar() {
                 <li>
                   <Link
                     to={"/home"}
-                    className="text-black_primary dark:text-[#252525 hover:underline"
+                    className="text-black_primary dark:text-[#252525] hover:underline"
                     aria-current="page"
                   >
-                    Home
+                    Principal
                   </Link>
                 </li>
                 <li>
                   <Link
                     to={"/search/diploma"}
-                    className="text-black_primary dark:text-[#252525 hover:underline"
+                    className="text-black_primary dark:text-[#252525] hover:underline"
                     aria-current="page"
                   >
                     Buscar titulos

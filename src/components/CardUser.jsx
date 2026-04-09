@@ -1,4 +1,4 @@
-import developer from "../assets/developer.jpg";
+import UserIcon from "./icons/User"
 
 export default function CardUser({
     nombre,
@@ -13,7 +13,7 @@ export default function CardUser({
             <div className="w-[200px] h-[200px] overflow-hidden rounded-lg">
                 <img
                     className="w-full h-full object-cover object-center"
-                    src={foto || developer}
+                    src={foto || UserIcon}
                     alt={nombre}
                 />
             </div>

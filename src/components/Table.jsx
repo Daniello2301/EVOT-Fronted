@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import SolicitarDocumentoModal from "./SolicitarDocumentoModal";
 import { useAuth } from "../context/AuthContext";
 import { useLocation, useNavigate } from "react-router-dom";
+import { GooeyToaster, gooeyToast } from 'goey-toast'
 
 export default function ({ ...props }) {
   const [data, setData] = useState([]);
@@ -13,6 +14,29 @@ export default function ({ ...props }) {
   const location = useLocation();
 
   const columnas = ['Título', 'Nivel', 'Libro', 'Fecha', 'Institución', 'Acciones'];
+
+  const showLoginInfoToast = () => {
+    gooeyToast.info('Debes iniciar sesión para solicitar el diploma', {
+      position: 'top-center',
+      fillColor: '#eff6ff',
+      borderColor: '#93c5fd',
+      borderWidth: 1.5,
+      showProgress: true,
+      preset: 'smooth',
+      classNames: {
+        wrapper: 'evot-toast-info-wrapper',
+        title: 'evot-toast-info-title',
+        description: 'evot-toast-info-description',
+        actionButton: 'evot-toast-info-action'
+      },
+      action: {
+        label: 'Iniciar sesión',
+        onClick: () => {
+          navigate('/login');
+        }
+      }
+    });
+  };
 
   useEffect(() => {
 
@@ -33,7 +57,9 @@ export default function ({ ...props }) {
 
   const handleSolicitar = (diploma) => {
     // Validar si está logueado
+    console.log(isLoggedIn);
     if (!isLoggedIn) {
+
       // Guardar el diploma y la URL actual
       guardarEstadoPendiente({
         diploma: diploma,
@@ -42,8 +68,7 @@ export default function ({ ...props }) {
         timestamp: new Date().toISOString()
       });
 
-      // Redirigir al login
-      navigate('/login');
+      showLoginInfoToast();
       return;
     }
 
@@ -53,6 +78,7 @@ export default function ({ ...props }) {
 
   return (
     <>
+      <GooeyToaster position="top-center" />
       <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
         <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
