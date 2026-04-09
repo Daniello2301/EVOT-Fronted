@@ -12,6 +12,7 @@ import LoginPage from "./pages/LoginPage";
 import { InsitutionsProvider } from "./context/InstitutionsContext";
 import { PrivateRoute, RoleRoute, PublicOnlyRoute } from "./routes/PrivateRoute";
 import StudentRegister from "./components/StudenRegisterForm";
+import { ToastContainer } from "react-toastify";
 
 function App() {
 
@@ -62,6 +63,7 @@ function App() {
 
     </Routes>
 
+    <ToastContainer   />
     </>
   );
 }
