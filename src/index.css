@@ -1,3 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.evot-toast-info-wrapper {
+	font-family: "Poppins", "Segoe UI", sans-serif;
+}
+
+.evot-toast-info-title {
+	color: #1d4ed8;
+	letter-spacing: 0.01em;
+}
+
+.evot-toast-info-description {
+	color: #1e3a8a;
+}
+
+.evot-toast-info-action {
+	background: #dbeafe;
+	color: #1d4ed8;
+	border: 1px solid #93c5fd;
+	transition: all 0.2s ease;
+}
+
+.evot-toast-info-action:hover {
+	background: #bfdbfe;
+}

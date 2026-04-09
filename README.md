@@ -8,6 +8,7 @@ Currently, two official plugins are available:
 - [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
 
-TODO
+## TODO
 
-- cuando el estudiante solicite el documento, validar si esta logueado o sino abrir el login
+- [ ] La vista publica no va permitir solicitar documento.
+- [*] cuando el estudiante solicite el documento, validar si esta logueado o sino abrir el login
