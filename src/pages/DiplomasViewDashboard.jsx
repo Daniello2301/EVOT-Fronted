@@ -8,15 +8,15 @@ import { useAuth } from "../context/AuthContext";
 import AdminDiplomasTable from "../components/AdminDiplomasTable";
 import { useInstitutionsContext } from "../context/InstitutionsContext";
 
-import * as API from '../services/institucions.service.js';
+import * as institutionsAPI from "../services/institucions.service";
+import * as diplomasAPI from "../services/diplomas.service";
 
 export default function DiplomasViewDashboard() {
 
     const { authUser } = useAuth()
-    const { setIntitutions } = useInstitutionsContext();
+    const { setInstitutions } = useInstitutionsContext();
     const navigate = useNavigate();
     const role = authUser?.rol
-    const TOKEN = localStorage.getItem('TOKEN')
 
     const [openModalEditDiploma, setOpenModalEditDiploma] = useState("" | undefined);
     const [openModalPreviewDiploma, setOpenModalPreviewDiploma] = useState("" | undefined);
@@ -38,43 +38,38 @@ export default function DiplomasViewDashboard() {
     }
 
     const getInstitutions = async () => {
-        const res = await API.getInstitutions(TOKEN);
-        console.log(res.data);
-        setIntitutions(res?.data)
+        const res = await institutionsAPI.getAllInstituciones();
+        const institutions = res?.data?.results ?? res?.data ?? [];
+        setInstitutions(institutions)
     }
 
 
     async function getDiplomas() {
         try {
-            const respuesta = await fetch("http://localhost:4000/api/diplomas", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `${TOKEN}`
-                },
-            });
+            const response = role === "ADMIN"
+                ? await diplomasAPI.getAllDiplomas()
+                : await diplomasAPI.getDiplomasByInstitution();
 
-            const data = await respuesta.json();
+            const normalized = Array.isArray(response)
+                ? response
+                : response?.results ?? response?.data ?? [];
 
-            console.log(data);
-            if (data.error) {
-                console.log(data.error);
-            } else {
-                setDiplomas(data)
-            }
-
-
+            console.log(normalized);
+            setDiplomas(normalized)
         } catch (error) {
             console.log(error);
         }
     }
 
     useEffect(() => {
-        if (role == 'ADMIN') {
+        if (role === 'ADMIN' || role === 'INSTITUCION') {
             getDiplomas();
+        }
+
+        if (role === 'ADMIN') {
             getInstitutions();
         }
-    }, [])
+    }, [role])
 
     return (
         <>
@@ -108,8 +103,8 @@ export default function DiplomasViewDashboard() {
                                 <li>
                                     <a href="#" className="flex items-center justify-center h-full py-1.5 px-3 ml-0 text-gray-500 bg-white rounded-l-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
                                         <span className="sr-only">Previous</span>
-                                        <svg className="w-5 h-5" aria-hidden="true" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                            <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                        <svg className="w-5 h-5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
                                         </svg>
                                     </a>
                                 </li>
@@ -131,8 +126,8 @@ export default function DiplomasViewDashboard() {
                                 <li>
                                     <a href="#" className="flex items-center justify-center h-full py-1.5 px-3 leading-tight text-gray-500 bg-white rounded-r-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
                                         <span className="sr-only">Next</span>
-                                        <svg className="w-5 h-5" aria-hidden="true" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                        <svg className="w-5 h-5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                                         </svg>
                                     </a>
                                 </li>

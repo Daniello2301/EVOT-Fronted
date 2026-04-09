@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import logo from '../assets/logo1.png';
+import logo from '../assets/logo1.webp';
 import { useAuth } from '../context/AuthContext';
 
 export default function NavDashboard() {
@@ -27,12 +27,17 @@ export default function NavDashboard() {
             <span className="sr-only">Toggle sidebar</span>
           </button>
 
-          <Link to="/home" className="flex items-center justify-between mr-4">
+          <Link to="/admin-dashboard" className="flex items-center justify-between mr-4">
             <img src={logo} className="mr-3 h-8" alt="Evot Logo" />
             <span className="text-white_primary self-center text-2xl font-semibold whitespace-nowrap">
               Evot Project
             </span>
           </Link>
+          <nav className=' mx-5 '>
+            <Link to="/home" className="text-white_primary hover:underline">
+              Principal
+            </Link>
+          </nav>
         </div>
 
         {/* Usuario y acciones */}
