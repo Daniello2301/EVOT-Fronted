@@ -3,21 +3,30 @@ import { axiosConfig } from "./axios.config";
 let isRefreshing = false;
 let refreshSubscribers = [];
 
+const PUBLIC_ROUTES = [
+    'auth/login',
+    'users/student'
+];
+
+// Función para agregar suscriptores que serán notificados cuando el token se refresque
 const subscribeTokenRefresh = (callback) => {
     refreshSubscribers.push(callback);
 };
 
+// Función para notificar a los suscriptores que el token ha sido refrescado
 const onRefreshed = (token) => {
     refreshSubscribers.forEach((cb) => cb(token));
     refreshSubscribers = [];
 };
 
+// Función para configurar los interceptores de Axios
 export const setupInterceptors = ({
     getAccessToken,
     refreshToken,
     logout
 }) => {
 
+    // Interceptor para agregar el token de acceso a cada solicitud
     axiosConfig.interceptors.request.use((config) => {
 
         const token = getAccessToken();
@@ -29,17 +38,33 @@ export const setupInterceptors = ({
         return config;
     });
 
+    // Interceptor para manejar respuestas y refrescar el token si es necesario
     axiosConfig.interceptors.response.use(
         (response) => response,
 
         async (error) => {
 
+            //console.log("ERROR INTERCEPTOR:", error);
+
             const originalRequest = error.config;
 
-            if (originalRequest.url.includes('auth/refresh') ||
-            originalRequest.url.includes('auth/logout')) {
-            return Promise.reject(error);
+            if (!originalRequest || !error.response) {
+                return Promise.reject(error);
             }
+
+            // Evitar bucles infinitos de refresh para rutas públicas o de autenticación
+            const isPublic = PUBLIC_ROUTES.some(route =>
+                originalRequest.url?.includes(route)
+            );
+
+            if (
+                originalRequest.url.includes('auth/refresh') ||
+                originalRequest.url.includes('auth/logout') ||
+                isPublic
+            ) {
+                return Promise.reject(error);
+            }
+
 
             if (error.response?.status !== 401) {
                 return Promise.reject(error);
@@ -70,7 +95,7 @@ export const setupInterceptors = ({
             try {
                 const newToken = await refreshToken();
 
-                
+
                 if (!newToken) {
                     isRefreshing = false;
                     refreshSubscribers = [];
@@ -86,7 +111,7 @@ export const setupInterceptors = ({
 
             } catch (err) {
                 isRefreshing = false;
-                refreshSubscribers = []; 
+                refreshSubscribers = [];
                 logout();
                 return Promise.reject(err);
             }

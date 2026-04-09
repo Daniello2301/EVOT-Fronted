@@ -12,8 +12,14 @@ export const getUsuarioById = async (id) => {
 
 export const createUsuario = async (data) => {
     const res = await axiosConfig.post('users', data);
+    
     return res.data;
 };
+
+export const registerStudent = async (data) => {
+    const res = await axiosConfig.post('users/student', data);
+    return res.data;
+}
 
 export const deactivateUsuario = async (id) => {
     const res = await axiosConfig.patch(`users/${id}/deactivate`);
