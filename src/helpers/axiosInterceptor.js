@@ -5,7 +5,12 @@ let refreshSubscribers = [];
 
 const PUBLIC_ROUTES = [
     'auth/login',
-    'users/student'
+    'auth/refresh',
+    'users/student',
+    'diplomas/verify',
+    'diplomas/by/graduate',
+    'solicitar-documento',
+    'institutions/actives'
 ];
 
 // Función para agregar suscriptores que serán notificados cuando el token se refresque
@@ -28,6 +33,14 @@ export const setupInterceptors = ({
 
     // Interceptor para agregar el token de acceso a cada solicitud
     axiosConfig.interceptors.request.use((config) => {
+
+        const isPublic = PUBLIC_ROUTES.some(route =>
+            config.url?.includes(route)
+        );
+
+        if (isPublic) {
+            return config;
+        }
 
         const token = getAccessToken();
 
@@ -57,14 +70,18 @@ export const setupInterceptors = ({
                 originalRequest.url?.includes(route)
             );
 
-            if (
+            const isAuthRoute =
                 originalRequest.url.includes('auth/refresh') ||
-                originalRequest.url.includes('auth/logout') ||
-                isPublic
-            ) {
+                originalRequest.url.includes('auth/logout');
+
+            if (
+                isAuthRoute || isPublic) {
                 return Promise.reject(error);
             }
 
+            if (error.response?.status === 403) {
+                return Promise.reject(error);
+            }
 
             if (error.response?.status !== 401) {
                 return Promise.reject(error);
