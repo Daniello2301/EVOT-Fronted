@@ -7,7 +7,7 @@ export const getDiplomasByGraduate = async (numeroDocumento) => {
 };
 
 export const verificarDiploma = async (codigoDiploma) => {
-    const res = await axiosConfig.get(`verificar/diploma/${codigoDiploma}`);
+    const res = await axiosConfig.get(`diplomas/verify/${codigoDiploma}`);
     return res.data;
 };
 
@@ -23,8 +23,13 @@ export const getAllDiplomas = async (params = {}) => {
 };
 
 export const getDiplomaById = async (id) => {
-    const res = await axiosConfig.get(`diplomas/${id}`);
-    return res.data;
+    try {
+        const res = await axiosConfig.get(`diplomas/${id}`);
+        return res.data;
+        
+    } catch (error) {
+        throw error.response?.data || error;
+    }
 };
 
 // Institución
