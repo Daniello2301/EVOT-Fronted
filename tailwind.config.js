@@ -20,17 +20,36 @@ export default {
         'black_primary':'#252525',
         'white_primary':"#F9F9F9"
       },
+      borderRadius: {
+        evot: '0.875rem'
+      },
+      boxShadow: {
+        'evot-card': '0 12px 30px -22px rgba(0, 74, 173, 0.45)',
+        'evot-card-hover': '0 20px 42px -24px rgba(0, 74, 173, 0.5)'
+      },
+      spacing: {
+        'ev-2': '0.5rem',
+        'ev-3': '0.75rem',
+        'ev-4': '1rem',
+        'ev-6': '1.5rem',
+        'ev-8': '2rem'
+      },
       fontFamily: {
+        'display': [
+          'Sora',
+          'Manrope',
+          'ui-sans-serif',
+          'system-ui',
+          'sans-serif'
+        ],
         'body': [
-          'Inter',
+          'Manrope',
           'ui-sans-serif',
           'system-ui',
           '-apple-system',
-          'system-ui',
           'Segoe UI',
           'Roboto',
           'Helvetica Neue',
-          'Arial',
           'Noto Sans',
           'sans-serif',
           'Apple Color Emoji',
@@ -39,15 +58,13 @@ export default {
           'Noto Color Emoji'
         ],
         'sans': [
-          'Inter',
+          'Manrope',
           'ui-sans-serif',
           'system-ui',
           '-apple-system',
-          'system-ui',
           'Segoe UI',
           'Roboto',
           'Helvetica Neue',
-          'Arial',
           'Noto Sans',
           'sans-serif',
           'Apple Color Emoji',

@@ -2,6 +2,101 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap');
+
+@layer base {
+	:root {
+		--evot-color-bg: #f9f9f9;
+		--evot-color-surface: #ffffff;
+		--evot-color-text: #0f172a;
+		--evot-color-text-soft: #334155;
+		--evot-color-brand: #004aad;
+		--evot-color-brand-strong: #0c3d7e;
+		--evot-radius-card: 0.875rem;
+		--evot-radius-pill: 999px;
+		--evot-space-2: 0.5rem;
+		--evot-space-3: 0.75rem;
+		--evot-space-4: 1rem;
+		--evot-space-6: 1.5rem;
+		--evot-space-8: 2rem;
+		--evot-shadow-card: 0 12px 30px -22px rgba(0, 74, 173, 0.45);
+		--evot-shadow-card-hover: 0 20px 42px -24px rgba(0, 74, 173, 0.5);
+		--evot-focus: 0 0 0 3px rgba(37, 99, 235, 0.28);
+	}
+
+	body {
+		@apply bg-white_primary text-black_primary antialiased;
+		font-family: 'Manrope', 'Segoe UI', sans-serif;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4 {
+		font-family: 'Sora', 'Manrope', 'Segoe UI', sans-serif;
+	}
+
+	a,
+	button,
+	input,
+	textarea,
+	select {
+		@apply focus-visible:outline-none;
+	}
+
+	:focus-visible {
+		box-shadow: var(--evot-focus);
+		border-radius: 0.375rem;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		*::before,
+		*::after {
+			animation-duration: 0.01ms !important;
+			animation-iteration-count: 1 !important;
+			transition-duration: 0.01ms !important;
+			scroll-behavior: auto !important;
+		}
+	}
+}
+
+@layer components {
+	.evot-surface-card {
+		background: var(--evot-color-surface);
+		border-radius: var(--evot-radius-card);
+		box-shadow: var(--evot-shadow-card);
+		transition: box-shadow 0.22s ease, transform 0.22s ease;
+	}
+
+	.evot-surface-card:hover {
+		box-shadow: var(--evot-shadow-card-hover);
+		transform: translateY(-1px);
+	}
+
+	.evot-badge {
+		border-radius: var(--evot-radius-pill);
+		padding: var(--evot-space-2) var(--evot-space-3);
+	}
+
+	.skip-link {
+		position: absolute;
+		top: -48px;
+		left: 16px;
+		z-index: 100;
+		padding: 10px 14px;
+		border-radius: 0.5rem;
+		background: var(--evot-color-brand);
+		color: #ffffff;
+		font-weight: 700;
+		transition: top 0.2s ease;
+	}
+
+	.skip-link:focus {
+		top: 12px;
+	}
+}
+
 .evot-toast-info-wrapper {
 	font-family: "Poppins", "Segoe UI", sans-serif;
 }
