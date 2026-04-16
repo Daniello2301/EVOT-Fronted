@@ -1,16 +1,67 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function AsideDashboard() {
   const { authUser } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
   const role = authUser?.rol;
   const isAdmin = role === "ADMIN";
   const isInstitution = role === "INSTITUCION";
 
+  useEffect(() => {
+    const onToggleRequest = (event) => {
+      setIsOpen(Boolean(event.detail?.isOpen));
+    };
+
+    const onResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsOpen(false);
+      }
+    };
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
+
+    window.addEventListener("dashboard-sidebar-toggle", onToggleRequest);
+    window.addEventListener("resize", onResize);
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      window.removeEventListener("dashboard-sidebar-toggle", onToggleRequest);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, []);
+
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("dashboard-sidebar-state", {
+        detail: { isOpen },
+      })
+    );
+  }, [isOpen]);
+
+  const handleItemClick = () => {
+    setIsOpen(false);
+  };
+
   return (
     <>
+      {isOpen && (
+        <button
+          type="button"
+          className="fixed inset-0 z-30 bg-slate-900/40 backdrop-blur-[1px] md:hidden"
+          aria-label="Cerrar menu lateral"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
       <aside
-        className="fixed top-0 left-0 z-40 w-56 h-screen pt-14 transition-transform -translate-x-full bg-gray_primary border-r border-gray-200 md:translate-x-0 "
+        className={`fixed top-0 left-0 z-40 w-56 h-screen pt-14 transition-transform duration-300 bg-gray_primary border-r border-gray-200 ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
         aria-label="Sidenav"
         id="drawer-navigation"
       >
@@ -19,6 +70,7 @@ export default function AsideDashboard() {
             <li>
               <Link
                 to={"/admin-dashboard"}
+                onClick={handleItemClick}
                 className="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
               >
                 <svg
@@ -38,6 +90,7 @@ export default function AsideDashboard() {
             <li>
               <Link
                 to={"diplomas"}
+                onClick={handleItemClick}
                 className="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
               >
                 <svg
@@ -57,6 +110,7 @@ export default function AsideDashboard() {
               <li>
                 <Link
                   to={"students"}
+                  onClick={handleItemClick}
                   className="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
                 >
                   <svg
@@ -78,6 +132,7 @@ export default function AsideDashboard() {
               <li>
                 <Link
                   to={"institutions"}
+                  onClick={handleItemClick}
                   className="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
                 >
                   <svg
@@ -100,6 +155,7 @@ export default function AsideDashboard() {
               <li>
                 <Link
                   to={"my-institution"}
+                  onClick={handleItemClick}
                   className="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group"
                 >
                   <svg
