@@ -1,6 +1,4 @@
 import { Link } from "react-router-dom";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 
 import heroImage from "../assets/hero.svg";
 
@@ -8,16 +6,16 @@ import heroImage from "../assets/hero.svg";
 // Sección Hero
 // ============================================================
 const Hero = () => (
-  <section className="bg-white_primary pt-16 pb-16">
+  <section aria-labelledby="home-hero-title" className="bg-white_primary pt-16 pb-16">
     <div className="grid max-w-screen-xl px-4 py-8 mx-auto lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12">
       <div className="mr-auto place-self-center lg:col-span-7">
-        <span className="bg-blue-100 text-blue_primary text-sm font-medium px-3 py-1 rounded-full mb-4 inline-block">
+        <span className="evot-badge bg-blue-100 text-blue_primary text-sm font-medium mb-4 inline-block">
           Verificación de títulos académicos
         </span>
-        <h1 className="max-w-2xl mb-4 text-4xl font-extrabold tracking-tight leading-none md:text-5xl xl:text-6xl text-blue_primary">
+        <h1 id="home-hero-title" className="max-w-2xl mb-4 text-4xl font-display font-extrabold tracking-tight leading-none md:text-5xl xl:text-6xl text-blue_primary">
           Valida tus títulos académicos
         </h1>
-        <p className="max-w-2xl mb-8 font-light text-gray-500 md:text-lg lg:text-xl">
+        <p className="max-w-2xl mb-8 font-medium text-slate-700 md:text-lg lg:text-xl leading-relaxed">
           Utiliza tu documento de identificación para explorar de manera
           sencilla todos los cursos, diplomas y programas que has completado en
           colaboración con nuestras instituciones socias.
@@ -25,10 +23,12 @@ const Hero = () => (
         <div className="flex flex-wrap gap-4">
           <Link
             to="/search/diploma"
-            className="inline-flex items-center justify-center px-5 py-3 text-base font-medium text-white rounded-lg bg-blue_primary hover:bg-blue_dark transition-colors duration-200 focus:ring-4 focus:ring-blue-300"
+            aria-label="Ir a buscar diplomas"
+            className="inline-flex items-center justify-center px-5 py-3 text-base font-medium text-white rounded-lg bg-blue_primary hover:bg-blue_dark transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-blue-300"
           >
             Buscar Diplomas
             <svg
+              aria-hidden="true"
               className="w-5 h-5 ml-2 -mr-1"
               fill="currentColor"
               viewBox="0 0 20 20"
@@ -42,7 +42,8 @@ const Hero = () => (
           </Link>
           <Link
             to="/partners"
-            className="inline-flex items-center justify-center px-5 py-3 text-base font-medium text-blue_primary border border-blue_primary rounded-lg hover:bg-gray-100 transition-colors duration-200 focus:ring-4 focus:ring-gray-100"
+            aria-label="Ir a instituciones socias"
+            className="inline-flex items-center justify-center px-5 py-3 text-base font-medium text-blue_primary border border-blue_primary rounded-lg hover:bg-gray-100 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-blue-200"
           >
             Ver instituciones socias
           </Link>
@@ -130,13 +131,13 @@ const steps = [
 ];
 
 const HowItWorks = () => (
-  <section className="bg-gray_primary py-16">
+  <section aria-labelledby="how-it-works-title" className="bg-gray_primary py-16">
     <div className="max-w-screen-xl px-4 mx-auto">
       <div className="text-center mb-12">
-        <h2 className="text-3xl font-extrabold text-blue_primary mb-4">
+        <h2 id="how-it-works-title" className="text-3xl font-display font-extrabold text-blue_primary mb-4">
           ¿Cómo funciona?
         </h2>
-        <p className="text-gray-500 max-w-xl mx-auto">
+        <p className="text-slate-700 max-w-xl mx-auto leading-relaxed">
           En tres simples pasos puedes verificar y obtener tus títulos
           académicos.
         </p>
@@ -146,7 +147,7 @@ const HowItWorks = () => (
         {steps.map((step) => (
           <div
             key={step.number}
-            className="bg-white_primary rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200"
+            className="evot-surface-card p-6"
           >
             <div className="flex items-center gap-4 mb-4">
               <span className="text-4xl font-extrabold text-gray_primary">
@@ -156,10 +157,10 @@ const HowItWorks = () => (
                 {step.icon}
               </div>
             </div>
-            <h3 className="text-lg font-bold text-blue_primary mb-2">
+            <h3 className="text-lg font-semibold text-blue_primary mb-2">
               {step.title}
             </h3>
-            <p className="text-gray-500 text-sm">{step.description}</p>
+            <p className="text-slate-700 text-sm leading-relaxed">{step.description}</p>
           </div>
         ))}
       </div>
@@ -171,19 +172,20 @@ const HowItWorks = () => (
 // Sección CTA
 // ============================================================
 const CTA = () => (
-  <section className="bg-blue_primary py-16">
-    <div className="max-w-screen px-4 mx-auto text-center">
-      <h2 className="text-3xl font-extrabold text-white_primary mb-4">
+  <section aria-labelledby="home-cta-title" className="bg-blue_primary py-16">
+    <div className="max-w-screen-xl px-4 mx-auto text-center">
+      <h2 id="home-cta-title" className="text-3xl font-display font-extrabold text-white_primary mb-4">
         ¿Listo para verificar tus títulos?
       </h2>
-      <p className="text-blue-200 mb-8 max-w-xl mx-auto">
+      <p className="text-blue-100 mb-8 max-w-xl mx-auto leading-relaxed">
         Accede de forma rápida y segura a todos tus certificados y diplomas
         académicos.
       </p>
       <div className="flex flex-wrap justify-center gap-4">
         <Link
           to="/search/diploma"
-          className="group relative text-blue_primary bg-white_primary inline-flex h-12 items-center justify-center overflow-hidden rounded-md  px-6 font-medium  border-white_primary border "
+          aria-label="Buscar mis titulos ahora"
+          className="group relative text-blue_primary bg-white_primary inline-flex h-12 items-center justify-center overflow-hidden rounded-md px-6 font-medium border-white_primary border focus-visible:ring-2 focus-visible:ring-white_primary"
         >
           <div className="mr-0 w-0 -translate-x-[100%] opacity-0 transition-all duration-200 group-hover:mr-1 group-hover:w-5 group-hover:translate-x-0 group-hover:opacity-100">
             <svg
@@ -206,7 +208,8 @@ const CTA = () => (
         </Link>
         <Link
           to="/about"
-          className="inline-flex items-center px-6 py-3 text-base font-medium text-white_primary border border-white_primary rounded-lg hover:bg-blue_dark transition-colors duration-200"
+          aria-label="Conocer mas sobre Evot"
+          className="inline-flex items-center px-6 py-3 text-base font-medium text-white_primary border border-white_primary rounded-lg hover:bg-blue_dark transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-blue-200"
         >
           Conocer más
         </Link>

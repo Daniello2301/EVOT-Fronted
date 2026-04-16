@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom'
 
 import Logo from '../assets/logo1.webp'
@@ -7,18 +8,51 @@ import { useAuth } from '../context/AuthContext';
 
 function Navbar() {
   const { authUser, logout } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
+
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    const onScroll = () => {
+      setHasScrolled(window.scrollY > 8);
+    };
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', onResize);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, []);
 
   const handleLogout = async () => {
     await logout(); // llama al backend y limpia localStorage
+    setIsMenuOpen(false);
   };
 
   return (
     <>
-      <nav className="bg-blue_primary max-w-screen z-10">
+      <nav
+        className={`sticky top-0 max-w-screen z-40 transition-all duration-300 ${hasScrolled ? 'bg-blue_primary/95 backdrop-blur-md shadow-evot-card' : 'bg-blue_primary'}`}
+      >
         <div className="flex flex-wrap justify-between items-center mx-auto max-w-screen-xl p-4">
-          <Link to={"/"} className="flex gap-2 items-center w-auto overflow-hidden justify-center text-white_primary hover:underline">
-            <img className="object-contain justify-center h-8 w-8" src={Logo} alt="" />
-            <span className="self-center text-2xl font-semibold whitespace-nowrap tracking-tight dark:text-[#252525]">
+          <Link to={"/"} className="flex gap-2 items-center w-auto overflow-hidden justify-center text-white_primary hover:underline" onClick={() => setIsMenuOpen(false)}>
+            <img className="object-contain justify-center h-8 w-8" src={Logo} alt="Logo de Evot Project" />
+            <span className="self-center text-2xl font-display font-semibold whitespace-nowrap tracking-tight dark:text-[#252525]">
               Evot Project
             </span>
           </Link>
@@ -53,6 +87,7 @@ function Navbar() {
                 (
                   <Link
                     to={`/login`}
+                    onClick={() => setIsMenuOpen(false)}
                     className="py-2 px-2 bg-white_primary rounded-lg text-l text-blue_dark font-semibold transition delay-75 duration-300 ease-in-out hover:scale-105"
                   >
                     Login
@@ -60,9 +95,10 @@ function Navbar() {
                 )
             }
             {
-              authUser?.rol === 'ADMIN' || authUser?.rol === 'INSTITUCION' && (
+              (authUser?.rol === 'ADMIN' || authUser?.rol === 'INSTITUCION') && (
                 <Link
                   to={`/admin-dashboard`}
+                  onClick={() => setIsMenuOpen(false)}
                   className="ml-4 py-2 px-2 bg-white_primary rounded-lg text-l text-blue_dark font-semibold transition delay-75 duration-300 ease-in-out hover:scale-105"
                 >
                   Dashboard
@@ -71,11 +107,12 @@ function Navbar() {
             }
 
             <button
-              data-collapse-toggle="navbar-user"
               type="button"
-              className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 "
-              aria-controls="navbar-user"
-              aria-expanded="false"
+              onClick={() => setIsMenuOpen((prev) => !prev)}
+              className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-100 rounded-lg md:hidden hover:bg-blue_dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white_primary"
+              aria-controls="navbar-menu"
+              aria-expanded={isMenuOpen}
+              aria-label={isMenuOpen ? 'Cerrar menu principal' : 'Abrir menu principal'}
             >
               <span className="sr-only">Open main menu</span>
               <svg
@@ -96,14 +133,18 @@ function Navbar() {
             </button>
           </div>
         </div>
-        <nav className="backdrop-blur-sm bg-gray_primary relative z-50 h-12">
+        <div
+          id="navbar-menu"
+          className={`backdrop-blur-sm bg-gray_primary/95 relative z-50 border-t border-slate-300/60 ${isMenuOpen ? 'block' : 'hidden'} md:block`}
+        >
           <div className="max-w-screen-xl px-4 py-3 mx-auto place-items-center md:flex md:justify-between">
             <div className="flex items-center">
-              <ul className="flex flex-row font-medium mt-0 mr-6 space-x-8 text-sm">
+              <ul className="flex flex-col md:flex-row font-medium mt-0 mr-6 gap-3 md:space-x-8 text-sm">
                 <li>
                   <Link
                     to={"/home"}
-                    className="text-black_primary dark:text-[#252525] hover:underline"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-black_primary hover:underline"
                     aria-current="page"
                   >
                     Principal
@@ -112,7 +153,8 @@ function Navbar() {
                 <li>
                   <Link
                     to={"/search/diploma"}
-                    className="text-black_primary dark:text-[#252525] hover:underline"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-black_primary hover:underline"
                     aria-current="page"
                   >
                     Buscar titulos
@@ -121,7 +163,8 @@ function Navbar() {
                 <li>
                   <Link
                     to={`/about`}
-                    className="text-black_primary dark:text-[#252525 hover:underline"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-black_primary hover:underline"
                   >
                     Acerca de
                   </Link>
@@ -137,7 +180,8 @@ function Navbar() {
                 <li>
                   <Link
                     to={`/partners`}
-                    className="text-black_primary dark:text-[#252525 hover:underline"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-black_primary hover:underline"
                   >
                     Nuestros Socios
                   </Link>
@@ -145,7 +189,7 @@ function Navbar() {
               </ul>
             </div>
           </div>
-        </nav>
+        </div>
       </nav>
     </>
   );
