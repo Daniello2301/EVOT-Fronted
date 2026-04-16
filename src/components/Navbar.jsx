@@ -70,17 +70,14 @@ function Navbar() {
                     to="/admin-dashboard"
                     onClick={() => setIsMenuOpen(false)}
                     aria-label="Ir al dashboard"
-                    className="h-10 w-10 sm:w-auto sm:px-3 inline-flex items-center justify-center gap-2 bg-white_primary rounded-lg text-sm text-blue_dark font-semibold transition delay-75 duration-300 ease-in-out hover:scale-105"
+                    className=" border-b-[1px] rounded-sm h-10 w-10 sm:w-auto sm:px-3 inline-flex items-center justify-center gap-2 text-sm text-white_primary  font-semibold transition delay-75 duration-300 ease-in-out hover:scale-105"
                   >
                     <DashboardIcon />
                     <span className="hidden sm:inline">Dashboard</span>
                   </Link>
                 )}
 
-                <div className="hidden md:flex items-center gap-2 rounded-full border border-white/35 bg-white/10 backdrop-blur-sm px-3 py-1.5 max-w-[14rem]">
-                  <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/20 text-xs font-bold text-white_primary">
-                    {authUser?.nombreUsuario?.charAt(0)?.toUpperCase() || 'U'}
-                  </span>
+                <div className="hidden md:flex items-center gap-2 backdrop-blur-sm px-3 py-1.5 max-w-[14rem]">
                   <div className="min-w-0 leading-tight">
                     <p className="text-white_primary text-sm font-semibold truncate">
                       Hola, {authUser.nombreUsuario}
@@ -88,7 +85,7 @@ function Navbar() {
                   </div>
                 </div>
 
-                <div className="md:hidden inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-xs font-bold text-white_primary border border-white/35" aria-label={`Usuario ${authUser.nombreUsuario}`}>
+                <div className="md:hidden inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-white_primary border border-white/35" aria-label={`Usuario ${authUser.nombreUsuario}`}>
                   {authUser?.nombreUsuario?.charAt(0)?.toUpperCase() || 'U'}
                 </div>
 
