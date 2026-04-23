@@ -53,16 +53,13 @@ export const AuthProvider = ({ children }) => {
 
         const data = await loginService({ correo, contraseña });
 
-        console.log("Respuesta del login:", data); // ✅ Log para verificar la respuesta del backend
-        // Extraemos el token, refresh token y la información del usuario del response del backend
         const token = data.usuario.tokens.token;
         // El refresh token también viene en la respuesta del backend, lo extraemos para guardarlo en localStorage
         const refreshToken = data.usuario.tokens.refreshToken;
 
         //decode token para obtener la información del usuario
         const decodedToken = jwtDecode(token);
-        console.log("Decoded Token:", decodedToken); // ✅ Log para verificar el contenido del token decodificado
-        // Creamos un objeto con la información del usuario que queremos guardar en el estado y localStorage
+
         const usuario = {
             _id: decodedToken._id,
             nombreUsuario: decodedToken.nombreUsuario,
@@ -107,7 +104,7 @@ export const AuthProvider = ({ children }) => {
             const refreshToken = localStorage.getItem("REFRESH_TOKEN");
             if (!refreshToken) return null;
 
-            // ✅ Timeout de 10s para no quedarse colgado indefinidamente
+            // Timeout de 10s para no quedarse colgado indefinidamente
             const timeoutPromise = new Promise((_, reject) =>
                 setTimeout(() => reject(new Error("Timeout al refrescar token")), 10000)
             );
@@ -135,7 +132,7 @@ export const AuthProvider = ({ children }) => {
             return newToken;
 
         } catch (error) {
-            await logout(false); // ✅ Se mantiene — logout tiene su propio finally que garantiza la limpieza
+            await logout(false); //Se mantiene — logout tiene su propio finally que garantiza la limpieza
             return null;
         }
     };
