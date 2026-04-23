@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import Sidebar from "../components/AsideDashBoard";
+import Sidebar from "../components/Dashboard/AsideDashBoard";
 import NavDashboard from "../components/NavDashboard";
 import { SidebarProvider, useSidebar } from "../context/SidebarContext";
 import Backdrop from "./Backdrop";

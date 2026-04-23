@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { Link, useLocation } from "react-router-dom";
-import { useSidebar } from "../context/SidebarContext";
+import { useSidebar } from "../../context/SidebarContext";
 
 import {
   GridIcon,
@@ -10,7 +10,7 @@ import {
   ChevronDownIcon,
   Institutions,
   Study
-} from "../icons";
+} from "../../icons";
 
 const NavItem = [
 

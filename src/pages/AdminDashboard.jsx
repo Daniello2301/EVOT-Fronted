@@ -1,6 +1,6 @@
 import { useAuth } from "../context/AuthContext";
 import NavDashboard from "../components/NavDashboard";
-import AsideDashboard from "../components/AsideDashBoard";
+import AsideDashboard from "../components/Dashboard/AsideDashBoard";
 import { Navigate, Route, Routes } from "react-router-dom";
 import DiplomasViewDashboard from "./DiplomasViewDashboard";
 import StudentsViewDashboard from "./StudentsViewDashBoard";
