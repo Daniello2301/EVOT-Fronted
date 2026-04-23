@@ -1,6 +1,41 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { Link, useLocation } from "react-router-dom";
+import { useSidebar } from "../context/SidebarContext";
+
+import {
+  GridIcon,
+  UserCircleIcon,
+  TableIcon,
+  ChevronDownIcon,
+  Institutions,
+  Study
+} from "../icons";
+
+const NavItem = [
+
+  {
+    name: "Dashboard",
+    icon: <GridIcon />,
+    path: "/admin-dashboard"
+  },
+  {
+    name: "Diplomas",
+    icon: <Study />,
+    path: "/admin-dashboard/diplomas"
+  },
+  {
+    name: "Estudiantes",
+    icon: <UserCircleIcon />,
+    path: "/admin-dashboard/estudiantes"
+  },
+  {
+    name: "Instituciones",
+    icon: <Institutions />,
+    path: "/admin-dashboard/instituciones"
+  }
+
+]
 
 export default function AsideDashboard() {
   const { authUser } = useAuth();
@@ -61,7 +96,7 @@ export default function AsideDashboard() {
       )}
 
       <aside
-        className={`fixed top-0 left-0 z-40 w-56 h-screen pt-14 transition-transform duration-300 bg-gray_primary border-r border-gray-200 ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
+        className={`fixed top-0 left-0 z-40 w-56 h-screen transition-transform duration-300 bg-gray_primary border-r border-gray-200 ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
         aria-label="Sidenav"
         id="drawer-navigation"
       >

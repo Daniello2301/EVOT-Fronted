@@ -1,4 +1,4 @@
-import UserIcon from "./icons/User"
+import UserIcon from "../icons/User"
 
 export default function CardUser({
     nombre,
