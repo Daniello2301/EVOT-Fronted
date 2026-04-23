@@ -15,7 +15,7 @@ const LayoutContent = () => {
             <Sidebar />
 
             {/* Contenido */}
-            <div className={`flex-1 transition-all duration-300 ease-in-out ${isExpanded || isHovered ? "lg:ml-[290px]" : "lg:ml-[90px]"
+            <div className={`flex-1 transition-all duration-300 ease-in-out ${isExpanded || isHovered ? "lg:ml-auto" : "lg:ml-auto"
                 } ${isMobileOpen ? "ml-0" : ""}`}>
 
                 {/* Navbar */}
