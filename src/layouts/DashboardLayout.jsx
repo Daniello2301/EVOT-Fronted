@@ -1,27 +1,43 @@
 import { Outlet } from "react-router-dom";
-import Sidebar from "../components/AsideDashBoard";
+import Sidebar from "../components/Dashboard/AsideDashBoard";
 import NavDashboard from "../components/NavDashboard";
+import { SidebarProvider, useSidebar } from "../context/SidebarContext";
+import Backdrop from "./Backdrop";
 
-export default function DashboardLayout() {
+
+const LayoutContent = () => {
+    const { isExpanded, isHovered, isMobileOpen } = useSidebar();
     return (
-        <div className="h-screen flex">
+        <div className="min-h-screen xl:flex">
 
             {/* Sidebar */}
+            <Backdrop />
             <Sidebar />
 
             {/* Contenido */}
-            <div className="flex flex-col flex-1">
+            <div className={`flex-1 transition-all duration-300 ease-in-out ${isExpanded || isHovered ? "lg:ml-auto" : "lg:ml-auto"
+                } ${isMobileOpen ? "ml-0" : ""}`}>
 
                 {/* Navbar */}
                 <NavDashboard />
 
                 {/* Main */}
-                <main className="flex-1 overflow-y-auto p-6 bg-gray-50">
+                <main className="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
                     <Outlet />
                 </main>
 
             </div>
 
         </div>
+
+    )
+
+}
+
+export default function DashboardLayout() {
+    return (
+        <SidebarProvider>
+            <LayoutContent />
+        </SidebarProvider>
     );
 }

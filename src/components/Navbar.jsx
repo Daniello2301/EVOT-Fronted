@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 import Logo from '../assets/logo1.webp';
 import { useAuth } from '../context/AuthContext';
-import DashboardIcon from './icons/DashboardIcon';
+import DashboardIcon from '../icons/DashboardIcon';
 
 function Navbar() {
   const { authUser, logout } = useAuth();
