@@ -1,3 +1,14 @@
+import { createRequire } from 'node:module'
+
+const require = createRequire(import.meta.url)
+
+let flowbitePlugin = null
+try {
+  flowbitePlugin = require('flowbite/plugin')
+} catch {
+  // Flowbite plugin is optional; keep Tailwind functional without it.
+}
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -75,8 +86,6 @@ export default {
       }
     },
   },
-  plugins: [
-    require('flowbite/plugin')
-  ],
+  plugins: flowbitePlugin ? [flowbitePlugin] : [],
 }
 
