@@ -1,14 +1,10 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Modal } from "flowbite-react";
 import Swal from 'sweetalert2'
-import { useNavigate } from "react-router-dom";
+import { createDiploma } from "../services/diplomas.service";
 
 function CreateDiplomaModal({ props }) {
-
-    const [institutions, setInstitutions] = useState([]);
-    const navigate = useNavigate();
-    const TOKEN = localStorage.getItem("TOKEN");
 
     const [dataDiplomaForm, setDataDiplomaForm] = useState({
         codigoDiploma: "",
@@ -17,8 +13,7 @@ function CreateDiplomaModal({ props }) {
         registroPrograma: "",
         libro: "",
         fechaGrados: "",
-        cedula: 0,
-        institucion: '',
+        numeroDocumento: "",
     });
 
     const handleChange = (e) => {
@@ -30,82 +25,31 @@ function CreateDiplomaModal({ props }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        /*  console.log(newDiploma); */
-
-        console.log(TOKEN)
-        console.log(dataDiplomaForm.institucion)
-        const newDiploma = {
-            codigoDiploma: dataDiplomaForm.codigoDiploma,
-            nombrePrograma: dataDiplomaForm.nombrePrograma,
-            nivelPrograma: dataDiplomaForm.nivelPrograma,
-            registroPrograma: dataDiplomaForm.registroPrograma,
-            libro: dataDiplomaForm.libro,
-            fechaGrados: dataDiplomaForm.fechaGrados,
-            cedula: parseInt(dataDiplomaForm.cedula),
-            institucion: dataDiplomaForm.institucion,
-        };
 
         try {
-            const response = await fetch("http://localhost:4000/api/diploma/create", {
-                method: "POST",
-                body: JSON.stringify(newDiploma),
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `${TOKEN}`,
-                },
-            });
+            const data = await createDiploma(dataDiplomaForm);
 
-            const data = await response.json();
+            Swal.fire(
+                'Evot Project Dice:',
+                `${data.msg}`,
 
-            if (data.error) {
-                console.log(data.error);
-            } else {
-                Swal.fire(
-                    'Evot Project Dice:',
-                    `${data.msg}`,
-
-                )
-                setDataDiplomaForm({
-                    codigoDiploma: "",
-                    nombrePrograma: "",
-                    nivelPrograma: "",
-                    registroPrograma: "",
-                    libro: "",
-                    fechaGrados: "",
-                    cedula: 0,
-                    institucion: '',
-                })
-            }
+            )
+            setDataDiplomaForm({
+                codigoDiploma: "",
+                nombrePrograma: "",
+                nivelPrograma: "",
+                registroPrograma: "",
+                libro: "",
+                fechaGrados: "",
+                numeroDocumento: "",
+            })
         } catch (error) {
-            console.log(error);
+            Swal.fire(
+                'Evot Project Dice:',
+                error?.response?.data?.msg || 'No fue posible crear el diploma.',
+            )
         }
     };
-
-    const getInstitutions = async () => {
-        try {
-            const respuesta = await fetch("http://localhost:4000/api/institutions", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `${TOKEN}`
-                },
-            });
-
-            const data = await respuesta.json();
-
-            console.log(data);
-            if (data.error) {
-                console.log(error);;
-            } else {
-                setInstitutions(data)
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
-    useEffect(() => {
-        getInstitutions();
-    }, [])
 
     return (
         <>
@@ -149,7 +93,7 @@ function CreateDiplomaModal({ props }) {
                                 <div className="grid gap-4 mb-4 sm:grid-cols-2">
                                     <div>
                                         <label
-                                            for="codigoDiploma"
+                                            htmlFor="codigoDiploma"
                                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                         >
                                             Codigo Diploma
@@ -167,7 +111,7 @@ function CreateDiplomaModal({ props }) {
                                     </div>
                                     <div>
                                         <label
-                                            for="nombrePrograma"
+                                            htmlFor="nombrePrograma"
                                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                         >
                                             Nombre del Programa
@@ -185,7 +129,7 @@ function CreateDiplomaModal({ props }) {
                                     </div>
                                     <div>
                                         <label
-                                            for="nivelPrograma"
+                                            htmlFor="nivelPrograma"
                                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                         >
                                             Nivel del Programa
@@ -203,7 +147,7 @@ function CreateDiplomaModal({ props }) {
                                     </div>
                                     <div>
                                         <label
-                                            for="registroPrograma"
+                                            htmlFor="registroPrograma"
                                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                         >
                                             Registro del Programa
@@ -221,7 +165,7 @@ function CreateDiplomaModal({ props }) {
                                     </div>
                                     <div>
                                         <label
-                                            for="libro"
+                                            htmlFor="libro"
                                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                         >
                                             Libro
@@ -239,7 +183,7 @@ function CreateDiplomaModal({ props }) {
                                     </div>
                                     <div>
                                         <label
-                                            for="fechaGrados"
+                                            htmlFor="fechaGrados"
                                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                         >
                                             Fecha de grados
@@ -257,53 +201,21 @@ function CreateDiplomaModal({ props }) {
                                     </div>
                                     <div>
                                         <label
-                                            for="cedula"
+                                            htmlFor="numeroDocumento"
                                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                         >
                                             Documento del estudiante
                                         </label>
                                         <input
                                             type="number"
-                                            name="cedula"
-                                            id="cedula"
-                                            value={dataDiplomaForm.cedula}
+                                            name="numeroDocumento"
+                                            id="numeroDocumento"
+                                            value={dataDiplomaForm.numeroDocumento}
                                             onChange={handleChange}
                                             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                                             placeholder="Documento del estudiante"
                                             required
                                         />
-                                    </div>
-                                    <div>
-                                        <label
-                                            for="institucion"
-                                            className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                                        >
-                                            Institucion
-                                        </label>
-                                        <select
-                                            id="institucion"
-                                            name="institucion"
-                                            onChange={handleChange}
-                                            value={dataDiplomaForm.institucion}
-                                            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                                        >
-                                            <option selected>
-                                                Institucion
-                                            </option>
-                                            {
-                                                institutions.length > 0 ? (
-                                                    institutions.map((intuticion) => (
-                                                        <option key={intuticion._id} value={intuticion._id}>
-                                                            {intuticion.nombreInstitucion}
-                                                        </option>
-                                                    ))
-                                                ) : (
-                                                    <option>
-                                                        No hay instituciones para mostrar
-                                                    </option>
-                                                )
-                                            }
-                                        </select>
                                     </div>
                                 </div>
                                 <button

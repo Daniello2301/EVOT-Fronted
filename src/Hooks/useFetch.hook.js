@@ -19,7 +19,7 @@ function useFetch(url) {
                 res.data.content && setData(res.data.content);
                 res.content && setData(res.content);
             })
-            .catch(err => {
+            .catch(() => {
                 setLoading(false)
                 setError('An error occurred. Awkward..')
             })

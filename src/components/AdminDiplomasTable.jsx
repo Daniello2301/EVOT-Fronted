@@ -1,40 +1,17 @@
-import React, { useState } from "react";
-
 import { Dropdown } from "flowbite-react";
+import { getDiplomaById } from "../services/diplomas.service";
 
 function AdminDiplomasTable({ props }) {
 
-
-  const TOKEN = localStorage.getItem('TOKEN')
-
-  const getDiploma = async(id)=>{
-      
-      try {
-          const response = await fetch(`http://localhost:4000/api/diploma/${id}`, {
-              method: "GET",
-              headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `${TOKEN}`,
-              },
-          });
-
-          const data = await response.json();
-
-          console.log(data);
-
-          if (data.error) {
-              console.log(data.error);
-          } else {
-              console.log(data)
-              props.setDiplomaUpdate(data)
-              
-          }
-      } catch (error) {
-          console.log(error);
-      }
+  const getDiploma = async (id) => {
+    try {
+      const data = await getDiplomaById(id);
+      props.setDiplomaUpdate(data);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
-  console.log(props.diplomas);
   return (
     <>
       <table className="w-full text-sm text-left text-gray-500 ">
@@ -78,9 +55,9 @@ function AdminDiplomasTable({ props }) {
                     {diploma.codigoDiploma}
                   </th>
                   <td className="px-4 py-3"> {new Date(diploma.fechaGrados).toDateString()} </td>
-                  <td className="px-4 py-3">  {diploma?.graduado.cedula} </td>
-                  <td className="px-4 py-3 max-w-[12rem] truncate"> {diploma?.graduado.nombreCompleto} </td>
-                  <td className="px-4 py-3"> {diploma?.institucion.nombreInstitucion} </td>
+                  <td className="px-4 py-3">  {diploma?.graduado?.numeroDocumento} </td>
+                  <td className="px-4 py-3 max-w-[12rem] truncate"> {diploma?.graduado ? `${diploma.graduado.nombres} ${diploma.graduado.apellidos}` : ''} </td>
+                  <td className="px-4 py-3"> {diploma?.institucion?.nombreInstitucion} </td>
                   <td className="px-4 py-3"> {diploma.nivelPrograma} </td>
                   <td className="px-4 py-3"> {diploma.nombrePrograma} </td>
                   <td className="px-4 py-3 flex items-center justify-end">  

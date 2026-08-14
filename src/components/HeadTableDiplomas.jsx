@@ -1,11 +1,7 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import CreateDiplomaModal from './CreateDiplomaModal';
 
 function HeadTableDiplomas() {
-
-    const TOKEN = localStorage.getItem('TOKEN')
-
-    console.log(TOKEN);
 
     const [openModalCreateDiploma, setOpenModalCreateDiploma] = useState("" | undefined);
 

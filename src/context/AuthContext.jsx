@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
 
     const [token, setToken] = useState(null);
 
-    const [estadoPendiente, setEstadoPendiente] = useState(null);
+    const [, setEstadoPendiente] = useState(null);
 
     const tokenRef = useRef(null);
 
@@ -80,17 +80,17 @@ export const AuthProvider = ({ children }) => {
     // ============================================================
     // Logout
     // ============================================================
-    // En logout() dentro de AuthContext.jsx — simplificar:
-    const logout = async () => {
+    const logout = async ({ notifyServer = true } = {}) => {
         try {
-            if (callBackend && tokenRef.current) {
+            if (notifyServer && tokenRef.current) {
                 await logoutService();
-            } 
+            }
         } catch (error) {
             // si falla el backend igual limpiamos localmente
         } finally {
             localStorage.removeItem("REFRESH_TOKEN");
-            limpiarEstadoPendiente(); // Limpiamos el estado pendiente al hacer logout, ya que el usuario ya no tiene sentido que sea redirigido a una página protegida después de cerrar sesión
+            tokenRef.current = null;
+            limpiarEstadoPendiente();
             setAuthUser(null);
             setToken(null);
             setIsLoggedIn(false);
@@ -132,7 +132,7 @@ export const AuthProvider = ({ children }) => {
             return newToken;
 
         } catch (error) {
-            await logout(false); //Se mantiene — logout tiene su propio finally que garantiza la limpieza
+            await logout({ notifyServer: false });
             return null;
         }
     };
@@ -152,6 +152,8 @@ export const AuthProvider = ({ children }) => {
             refreshToken: refreshAccessToken,
             logout
         });
+    // Interceptors are registered once and read the current token from tokenRef.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
 
@@ -164,13 +166,15 @@ export const AuthProvider = ({ children }) => {
 
             const refreshToken = localStorage.getItem("REFRESH_TOKEN");
             if (refreshToken) {
-                const newToken = await refreshAccessToken();
+                await refreshAccessToken();
             }
             setLoading(false); // Indicamos que ya no estamos cargando la autenticación, independientemente de si se pudo recuperar la sesión o no
 
         };
 
         initializeAuth();
+    // Session restoration runs only during provider initialization.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return (

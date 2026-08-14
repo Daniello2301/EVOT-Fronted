@@ -16,10 +16,10 @@ export default function SolicitarDocumentoModal({ diploma, onClose }) {
 
     useEffect(() => {
         if (authUser) {
-            setForm({
-                ...form,
+            setForm((currentForm) => ({
+                ...currentForm,
                 correoSolicitante: authUser.correo || ''
-            });
+            }));
         }
     }, [authUser]);
 

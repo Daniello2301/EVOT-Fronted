@@ -1,14 +1,35 @@
-# React + Vite
+# EVOT Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicacion React/Vite para la consulta publica y el panel de administracion de diplomas.
 
-Currently, two official plugins are available:
+## Requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Node.js 18 o superior.
+- El backend de EVOT disponible en una URL accesible.
 
+## Configuracion
 
-## TODO
+1. Copia `.env.example` como `.env`.
+2. Define `VITE_API_BASE_URL` con la URL de la API, sin barra final.
 
-- [ ] La vista publica no va permitir solicitar documento.
-- [*] cuando el estudiante solicite el documento, validar si esta logueado o sino abrir el login
+Configuracion local esperada:
+
+```env
+VITE_API_BASE_URL=http://localhost:5000/api
+```
+
+El valor se incorpora durante el build de Vite. Para produccion debe configurarse antes de ejecutar `npm run build`.
+
+## Ejecucion
+
+```bash
+npm install
+npm run dev
+```
+
+## Verificacion
+
+```bash
+npm run lint
+npm run build
+```

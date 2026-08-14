@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { registerStudent } from "../services/usuarios.service";
 
 function StudentRegister() {
-    const { login, recuperarEstadoPendiente } = useAuth();
+    const { login } = useAuth();
     const navigate = useNavigate();
 
     const [formData, setFormData] = useState({

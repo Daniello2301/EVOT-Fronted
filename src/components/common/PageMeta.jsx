@@ -1,6 +1,6 @@
 import { HelmetProvider, Helmet } from 'react-helmet-async';
 
-const PageMeta = ({ title, description, children }) => (
+const PageMeta = ({ title, description }) => (
     <Helmet>
         <title>{title}</title>
         <meta name="description" content={description} />

@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Modal } from 'flowbite-react';
 
-import * as API from '../services/institucions.service'
 import { useInstitutionsContext } from '../context/InstitutionsContext';
 
 function UpdateDiplomaModal({ props, diplomaUpdate }) {
@@ -74,7 +73,7 @@ function UpdateDiplomaModal({ props, diplomaUpdate }) {
                                 <div className="grid gap-4 mb-4 sm:grid-cols-2">
                                     <div>
                                         <label
-                                            for="codigoDiploma"
+                                            htmlFor="codigoDiploma"
                                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                         >
                                             Codigo Diploma
@@ -92,7 +91,7 @@ function UpdateDiplomaModal({ props, diplomaUpdate }) {
                                     </div>
                                     <div>
                                         <label
-                                            for="nombrePrograma"
+                                            htmlFor="nombrePrograma"
                                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                         >
                                             Nombre del Programa
@@ -110,7 +109,7 @@ function UpdateDiplomaModal({ props, diplomaUpdate }) {
                                     </div>
                                     <div>
                                         <label
-                                            for="nivelPrograma"
+                                            htmlFor="nivelPrograma"
                                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                         >
                                             Nivel del Programa
@@ -128,7 +127,7 @@ function UpdateDiplomaModal({ props, diplomaUpdate }) {
                                     </div>
                                     <div>
                                         <label
-                                            for="registroPrograma"
+                                            htmlFor="registroPrograma"
                                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                         >
                                             Registro del Programa
@@ -146,7 +145,7 @@ function UpdateDiplomaModal({ props, diplomaUpdate }) {
                                     </div>
                                     <div>
                                         <label
-                                            for="libro"
+                                            htmlFor="libro"
                                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                         >
                                             Libro
@@ -164,7 +163,7 @@ function UpdateDiplomaModal({ props, diplomaUpdate }) {
                                     </div>
                                     <div>
                                         <label
-                                            for="fechaGrados"
+                                            htmlFor="fechaGrados"
                                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                         >
                                             Fecha de grados
@@ -182,7 +181,7 @@ function UpdateDiplomaModal({ props, diplomaUpdate }) {
                                     </div>
                                     <div>
                                         <label
-                                            for="cedula"
+                                            htmlFor="cedula"
                                             className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                                         >
                                             Documento del estudiante

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 function Login() {
-  const { login, recuperarEstadoPendiente, limpiarEstadoPendiente } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const [correo, setCorreo] = useState("");

@@ -116,7 +116,7 @@ export const setupInterceptors = ({
                 if (!newToken) {
                     isRefreshing = false;
                     refreshSubscribers = [];
-                    logout();
+                    await logout({ notifyServer: false });
                     return Promise.reject(new Error('No se pudo renovar el token'));
                 }
 
@@ -129,7 +129,7 @@ export const setupInterceptors = ({
             } catch (err) {
                 isRefreshing = false;
                 refreshSubscribers = [];
-                logout();
+                await logout({ notifyServer: false });
                 return Promise.reject(err);
             }
         }

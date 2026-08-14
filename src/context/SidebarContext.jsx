@@ -61,7 +61,7 @@ export const SidebarProvider = ({ children }) => {
             toggleMobileSidebar,
             toggleSubmenu,
             setActiveItem,
-            toggleSubmenu
+            setIsHovered
         }}>
             {children}
         </SidebarContext.Provider>

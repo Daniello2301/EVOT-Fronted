@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
 import SolicitarDocumentoModal from "./SolicitarDocumentoModal";
 import { useAuth } from "../context/AuthContext";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { GooeyToaster, gooeyToast } from 'goey-toast'
 
-export default function ({ ...props }) {
+export default function Table({ diplomas }) {
   const [data, setData] = useState([]);
 
   const [diplomaSeleccionado, setDiplomaSeleccionado] = useState(null);
 
   const { isLoggedIn, guardarEstadoPendiente, recuperarEstadoPendiente, limpiarEstadoPendiente } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
   const columnas = ['Título', 'Nivel', 'Libro', 'Fecha', 'Institución', 'Acciones'];
 
@@ -52,8 +51,10 @@ export default function ({ ...props }) {
 
     }
 
-    setData(props.diplomas);
-  }, [props, isLoggedIn]);
+    setData(diplomas);
+    // Context helpers are stable for the provider lifetime.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [diplomas, isLoggedIn]);
 
   const handleSolicitar = (diploma) => {
     // Validar si está logueado

@@ -1,12 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import logo from '../assets/logo1.webp';
-import { useAuth } from '../context/AuthContext';
 import { useSidebar } from '../context/SidebarContext';
 
 export default function NavDashboard() {
-  const { authUser, logout } = useAuth();
-
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
 
@@ -38,10 +33,6 @@ export default function NavDashboard() {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
-
-  const handleLogout = async () => {
-    await logout(); // llama al backend y limpia localStorage
-  };
 
   return (
     <header className="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b">

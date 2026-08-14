@@ -1,4 +1,4 @@
-export default function Logout(params) {
+export default function Logout() {
     return (
         <svg width="20" height="20" viewBox="0 0 20 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -7,4 +7,4 @@ export default function Logout(params) {
             <path d="M6 15l-3 -3" />
         </svg>
     )
-};
+}

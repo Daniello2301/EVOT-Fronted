@@ -3,7 +3,6 @@ import DeleteModal from "../components/DeleteModal";
 import HeadTableDiplomas from "../components/HeadTableDiplomas";
 import ReadDiplomaModal from "../components/ReadDiplomaModal";
 import UpdateDiplomaModal from "../components/UpdateDiplomaModal";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AdminDiplomasTable from "../components/AdminDiplomasTable";
 import { useInstitutionsContext } from "../context/InstitutionsContext";
@@ -15,7 +14,6 @@ export default function DiplomasViewDashboard() {
 
     const { authUser } = useAuth()
     const { setInstitutions } = useInstitutionsContext();
-    const navigate = useNavigate();
     const role = authUser?.rol
 
     const [openModalEditDiploma, setOpenModalEditDiploma] = useState("" | undefined);
@@ -69,6 +67,8 @@ export default function DiplomasViewDashboard() {
         if (role === 'ADMIN') {
             getInstitutions();
         }
+    // Data is loaded only when the authenticated role changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [role])
 
     return (

@@ -1,17 +1,11 @@
-import { useEffect, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
 import { Link, useLocation } from "react-router-dom";
 import { useSidebar } from "../../context/SidebarContext";
 
 import {
   GridIcon,
   UserCircleIcon,
-  TableIcon,
-  ChevronDownIcon,
   Institutions,
-  Study,
-  HorizontaLDots,
-  ListIcon
+  Study
 } from "../../icons";
 
 const navItems = [
@@ -43,14 +37,7 @@ const navItems = [
 
 export default function AsideDashboard() {
 
-  const { isExpanded, isMobileOpen, isHovered, setHovered } = useSidebar();
-  const { authUser } = useAuth();
-
-  const [isOpen, setIsOpen] = useState(false);
-
-  const role = authUser?.rol;
-  const isAdmin = role === "ADMIN";
-  const isInstitution = role === "INSTITUCION";
+  const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
 
 
   const location = useLocation();

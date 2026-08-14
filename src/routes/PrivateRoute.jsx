@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 
 // Ruta privada — redirige a /login si no está autenticado
 export const PrivateRoute = () => {
-    const { authUser, isLoggedIn, loading } = useAuth();
+    const { authUser, loading } = useAuth();
     if (loading) return <div className="flex items-center justify-center h-screen text-blue_primary">Cargando...</div>;
     return authUser ? <Outlet /> : <Navigate to="/login" replace />;
 };

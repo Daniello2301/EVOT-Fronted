@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { Modal } from 'flowbite-react'
 
 function ReadDiplomaModal({props}) {
