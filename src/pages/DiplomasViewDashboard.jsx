@@ -19,6 +19,8 @@ export default function DiplomasViewDashboard() {
   const [notice, setNotice] = useState('');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [serverPages, setServerPages] = useState(1);
+  const [serverTotal, setServerTotal] = useState(0);
   const [reload, setReload] = useState(0);
   const [selected, setSelected] = useState(null);
   const [modal, setModal] = useState(null);
@@ -36,8 +38,12 @@ export default function DiplomasViewDashboard() {
         }
         const result = role === 'ADMIN'
           ? await diplomasAPI.getAllDiplomas()
-          : await diplomasAPI.getDiplomasByInstitution();
-        if (active) setDiplomas(extractDiplomaList(result));
+          : await diplomasAPI.getDiplomasByInstitution({page, limit: PAGE_SIZE});
+        if (active) {
+          setDiplomas(extractDiplomaList(result));
+          setServerPages(role === 'INSTITUCION' ? Math.max(1, Number(result?.totalPages) || 1) : 1);
+          setServerTotal(role === 'INSTITUCION' ? Number(result?.total) || 0 : 0);
+        }
       } catch (err) {
         if (active) {
           setDiplomas([]);
@@ -49,12 +55,12 @@ export default function DiplomasViewDashboard() {
     };
     load();
     return () => { active = false; };
-  }, [role, reload]);
+  }, [role, reload, page]);
 
   const filtered = useMemo(() => filterDiplomas(diplomas, search), [diplomas, search]);
-  const pages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pages = role === 'INSTITUCION' ? serverPages : Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, pages);
-  const visible = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const visible = role === 'INSTITUCION' ? filtered : filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const onSearch = (text) => { setSearch(text); setPage(1); };
   const onSaved = (message) => {
@@ -99,7 +105,9 @@ export default function DiplomasViewDashboard() {
             onDeactivate={(diploma) => { setSelected(diploma); setModal('deactivate'); }} />
         )}
         <nav aria-label="Paginación de diplomas" className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 p-4 text-sm text-gray-600">
-          <span>{filtered.length} diploma(s) en la lista cargada · Página {currentPage} de {pages}</span>
+          <span>{role === 'INSTITUCION'
+            ? `${serverTotal} diploma(s) en la institución · Página ${currentPage} de ${pages} · Búsqueda en página actual`
+            : `${filtered.length} diploma(s) en la lista cargada · Página ${currentPage} de ${pages}`}</span>
           <div className="flex gap-2">
             <button type="button" disabled={currentPage <= 1 || loading} onClick={() => setPage((value) => Math.max(1, value - 1))}
               className="rounded-lg border border-gray-300 px-3 py-2 disabled:cursor-not-allowed disabled:opacity-40">Anterior</button>
