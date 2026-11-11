@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { registerStudent } from "../services/usuarios.service";
+import { postLoginPath } from "../helpers/authSession.js";
 
 function StudentRegister() {
     const { login } = useAuth();
@@ -49,16 +50,9 @@ function StudentRegister() {
             await registerStudent(newStudent);
 
             // 2. ⭐ Hacer login automático después del registro exitoso
-            const estadoPendiente = await login(formData.correo, formData.contraseña);
-
-            // 3. ⭐ Redirigir según si hay estado pendiente o no
-            if (estadoPendiente) {
-                // Si el usuario estaba intentando solicitar un diploma, volver a esa página
-                navigate(estadoPendiente.url);
-            } else {
-                // Si no, ir al home o dashboard
-                navigate("/");
-            }
+            const session = await login(formData.correo, formData.contraseña);
+            if (!session) throw new Error("El registro finalizó, pero no fue posible iniciar sesión");
+            navigate(postLoginPath(session.pending, session.user?.rol), { replace: true });
 
         } catch (err) {
             setError(err?.response?.data?.msg || err?.message || "Error al registrarse");
