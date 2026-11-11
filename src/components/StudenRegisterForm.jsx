@@ -45,12 +45,8 @@ function StudentRegister() {
             };
 
             // 1. Registrar al usuario
-            const response = await registerStudent(newStudent);
-
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.msg || 'Error al registrarse');
-            }
+            // Axios ya rechaza respuestas HTTP no exitosas. El servicio devuelve data.
+            await registerStudent(newStudent);
 
             // 2. ⭐ Hacer login automático después del registro exitoso
             const estadoPendiente = await login(formData.correo, formData.contraseña);
@@ -65,7 +61,7 @@ function StudentRegister() {
             }
 
         } catch (err) {
-            setError(err?.response?.data?.msg || "Error al registrarse");
+            setError(err?.response?.data?.msg || err?.message || "Error al registrarse");
 
         } finally {
             setLoading(false);
