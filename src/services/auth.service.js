@@ -16,8 +16,9 @@ export const logoutService = async () => {
 
 // refresgh token
 export const refreshTokenService = async (refreshToken) => {
-    const res = await axiosConfig.post("/auth/refresh", {}, {
-        headers: { Authorization: `Bearer ${refreshToken}` }
+    const res = await axiosConfig.post("auth/refresh", {}, {
+        headers: { Authorization: `Bearer ${refreshToken}` },
+        timeout: 10000
     });
     return res.data;
 };

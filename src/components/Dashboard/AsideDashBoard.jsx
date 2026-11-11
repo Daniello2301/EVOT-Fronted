@@ -23,12 +23,12 @@ const navItems = [
   {
     name: "Estudiantes",
     icon: <UserCircleIcon />,
-    path: "/admin-dashboard/estudiantes"
+    path: "/admin-dashboard/students"
   },
   {
     name: "Instituciones",
     icon: <Institutions />,
-    path: "/admin-dashboard/instituciones"
+    path: "/admin-dashboard/institutions"
   }
 
 ]
