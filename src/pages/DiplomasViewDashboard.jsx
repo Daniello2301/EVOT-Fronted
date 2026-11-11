@@ -64,7 +64,7 @@ export default function DiplomasViewDashboard() {
   };
   const closeModal = () => { setModal(null); setSelected(null); };
 
-  const openEdit = async (diploma) => {
+  const openDetail = async (diploma, action) => {
     const id = diplomaId(diploma);
     if (!id || openingEdit) return;
     setOpeningEdit(true);
@@ -73,8 +73,8 @@ export default function DiplomasViewDashboard() {
       const response = await diplomasAPI.getDiplomaById(id);
       const detail = extractDiploma(response);
       if (!detail) throw new Error('La API no devolvió el diploma seleccionado.');
-      setSelected(detail);
-      setModal('edit');
+      setSelected({ ...diploma, ...detail, _id: diplomaId(detail) || id });
+      setModal(action);
     } catch (err) {
       setError(diplomaError(err, 'No fue posible cargar el diploma.'));
     } finally {
@@ -94,8 +94,8 @@ export default function DiplomasViewDashboard() {
           <p className="p-8 text-center text-gray-600">{search ? 'No se encontraron diplomas con ese criterio.' : 'No hay diplomas para mostrar.'}</p>
         ) : (
           <AdminDiplomasTable diplomas={visible} busy={openingEdit}
-            onEdit={openEdit}
-            onPreview={(diploma) => { setSelected(diploma); setModal('preview'); }}
+            onEdit={(diploma) => openDetail(diploma, 'edit')}
+            onPreview={(diploma) => openDetail(diploma, 'preview')}
             onDeactivate={(diploma) => { setSelected(diploma); setModal('deactivate'); }} />
         )}
         <nav aria-label="Paginación de diplomas" className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 p-4 text-sm text-gray-600">

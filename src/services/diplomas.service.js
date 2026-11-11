@@ -1,4 +1,5 @@
 import { axiosConfig } from '../helpers/axios.config';
+import { assertDiplomaMutation } from '../helpers/diplomaModel.js';
 
 // Público
 export const getDiplomasByGraduate = async (numeroDocumento) => {
@@ -29,15 +30,15 @@ export const getDiplomasByInstitution = async (params = {}) => {
 };
 export const createDiploma = async (data) => {
   const res = await axiosConfig.post('diplomas', data);
-  return res.data;
+  return assertDiplomaMutation(res.data);
 };
 export const updateDiploma = async (id, data) => {
   const res = await axiosConfig.put('diplomas/' + encodeURIComponent(id), data);
-  return res.data;
+  return assertDiplomaMutation(res.data);
 };
 export const deactivateDiploma = async (id) => {
   const res = await axiosConfig.patch('diplomas/' + encodeURIComponent(id) + '/deactivate');
-  return res.data;
+  return assertDiplomaMutation(res.data);
 };
 export const solicitarEdicion = async (id, motivoSolicitud) => {
   const res = await axiosConfig.post('diplomas/' + encodeURIComponent(id) + '/solicitar-edicion', {motivoSolicitud});

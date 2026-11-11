@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { extractDiplomaList, extractDiploma, diplomaId, diplomaToForm, diplomaPayload, filterDiplomas, diplomaError } from '../src/helpers/diplomaModel.js';
+import { extractDiplomaList, extractDiploma, diplomaId, diplomaToForm, diplomaPayload, filterDiplomas, diplomaError, assertDiplomaMutation } from '../src/helpers/diplomaModel.js';
 
 test('Extracts flat and nested collection payloads', () => {
   const xs = [{_id:'a'}];
@@ -46,4 +46,11 @@ test('Filters by code, title, graduate and institution with accent-insensitive m
 test('Returns safe fallback and backend error messages', () => {
   assert.equal(diplomaError({response:{data:{msg:'Sin permisos'}}}),'Sin permisos');
   assert.match(diplomaError({}),/No se pudo/);
+});
+
+test('Diploma mutations reject logical errors and accept successful responses', () => {
+  const success = { success: true, msg: 'Guardado' };
+  assert.equal(assertDiplomaMutation(success), success);
+  assert.throws(() => assertDiplomaMutation({ok:false,msg:'No autorizado'}), /No autorizado/);
+  assert.throws(() => assertDiplomaMutation({data:{success:false,message:'Registro duplicado'}}), /Registro duplicado/);
 });

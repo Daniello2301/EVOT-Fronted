@@ -65,3 +65,12 @@ export function filterDiplomas(diplomas, search) {
 export function diplomaError(error, fallback = 'No se pudo completar la operación.') {
   return error?.response?.data?.msg || error?.response?.data?.message || error?.message || fallback;
 }
+
+/** Treat API-level failure responses as failures, even if HTTP status was 2xx. */
+export function assertDiplomaMutation(payload) {
+  const value = payload?.data ?? payload;
+  if (value?.ok === false || value?.success === false || payload?.ok === false || payload?.success === false) {
+    throw new Error(value?.msg || value?.message || payload?.msg || payload?.message || 'La operación fue rechazada.');
+  }
+  return payload;
+}
