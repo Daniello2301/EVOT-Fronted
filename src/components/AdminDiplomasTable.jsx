@@ -6,7 +6,7 @@ function safeDate(value) {
   return Number.isNaN(parsed.getTime()) ? '—' : parsed.toLocaleDateString('es-CO', {timeZone:'UTC'});
 }
 
-export default function AdminDiplomasTable({ diplomas, onEdit, onPreview, onDeactivate, busy }) {
+export default function AdminDiplomasTable({ diplomas, onEdit, onPreview, onDeactivate, busy, canDeactivate = false }) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[880px] text-left text-sm text-gray-700">
@@ -34,7 +34,7 @@ export default function AdminDiplomasTable({ diplomas, onEdit, onPreview, onDeac
                 <div className="flex gap-3 whitespace-nowrap">
                   <button type="button" disabled={busy} onClick={() => onPreview(diploma)} className="font-medium text-blue-700 hover:underline disabled:opacity-50">Ver</button>
                   <button type="button" disabled={busy || !diplomaId(diploma)} onClick={() => onEdit(diploma)} className="font-medium text-blue-700 hover:underline disabled:opacity-50">Editar</button>
-                  <button type="button" disabled={busy || !diplomaId(diploma)} onClick={() => onDeactivate(diploma)} className="font-medium text-red-700 hover:underline disabled:opacity-50">Desactivar</button>
+                  {canDeactivate && <button type="button" disabled={busy || !diplomaId(diploma)} onClick={() => onDeactivate(diploma)} className="font-medium text-red-700 hover:underline disabled:opacity-50">Desactivar</button>}
                 </div>
               </td>
             </tr>

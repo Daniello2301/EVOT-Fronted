@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import CreateDiplomaModal from './CreateDiplomaModal';
 
-export default function HeadTableDiplomas({ search, onSearch, onSaved }) {
+export default function HeadTableDiplomas({ search, onSearch, onSaved, canCreate = false }) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -14,12 +14,12 @@ export default function HeadTableDiplomas({ search, onSearch, onSaved }) {
           <label htmlFor="buscar-diploma" className="sr-only">Buscar diplomas</label>
           <input id="buscar-diploma" type="search" value={search} onChange={(event) => onSearch(event.target.value)}
             placeholder="Buscar por código, programa o graduado" className="min-w-0 rounded-lg border border-gray-300 p-2.5 text-sm text-gray-900 sm:w-64" />
-          <button type="button" onClick={() => setOpen(true)} className="rounded-lg bg-blue_primary px-4 py-2.5 text-sm font-medium text-white">
+          {canCreate && <button type="button" onClick={() => setOpen(true)} className="rounded-lg bg-blue_primary px-4 py-2.5 text-sm font-medium text-white">
             Agregar diploma
-          </button>
+          </button>}
         </div>
       </header>
-      <CreateDiplomaModal open={open} onClose={() => setOpen(false)} onSaved={onSaved} />
+      {canCreate && <CreateDiplomaModal open={open} onClose={() => setOpen(false)} onSaved={onSaved} />}
     </>
   );
 }

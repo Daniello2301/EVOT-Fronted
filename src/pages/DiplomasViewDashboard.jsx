@@ -85,7 +85,7 @@ export default function DiplomasViewDashboard() {
   return (
     <section className="min-h-[30rem] bg-gray-50 p-4 sm:p-6">
       <div className="mx-auto max-w-screen-xl overflow-hidden rounded-xl bg-white shadow-sm">
-        <HeadTableDiplomas search={search} onSearch={onSearch} onSaved={onSaved} />
+        <HeadTableDiplomas search={search} onSearch={onSearch} onSaved={onSaved} canCreate={role === "INSTITUCION"} />
         {notice && <p role="status" className="m-4 rounded-lg bg-green-50 p-3 text-sm text-green-800">{notice}</p>}
         {error && <p role="alert" className="m-4 rounded-lg bg-red-50 p-3 text-sm text-red-800">{error}</p>}
         {loading ? (
@@ -93,7 +93,7 @@ export default function DiplomasViewDashboard() {
         ) : filtered.length === 0 ? (
           <p className="p-8 text-center text-gray-600">{search ? 'No se encontraron diplomas con ese criterio.' : 'No hay diplomas para mostrar.'}</p>
         ) : (
-          <AdminDiplomasTable diplomas={visible} busy={openingEdit}
+          <AdminDiplomasTable diplomas={visible} busy={openingEdit} canDeactivate={role === "ADMIN"}
             onEdit={(diploma) => openDetail(diploma, 'edit')}
             onPreview={(diploma) => openDetail(diploma, 'preview')}
             onDeactivate={(diploma) => { setSelected(diploma); setModal('deactivate'); }} />
