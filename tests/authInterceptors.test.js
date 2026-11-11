@@ -78,3 +78,23 @@ test('Stale request retries current JWT without refreshing',async()=>{
   assert.equal(count,0);
   eject();
 });
+
+test('JWT is not attached to another origin even when using the shared client', async () => {
+  const f = fakeAxios();
+  f.client.defaults = { baseURL: 'https://api.ejemplo.test/api/' };
+  let refreshCount = 0;
+  const eject = installAuthInterceptors(f.client, {
+    getAccessToken: () => 'secret-access-token',
+    refreshToken: async () => {refreshCount++;return 'new';},
+    logout: async () => {}
+  });
+  const request = [...f.requests.values()][0];
+  const external = request({url:'https://external.example/data',headers:{}});
+  assert.equal(external.headers.Authorization,undefined);
+  const internal = request({url:'diplomas/1',headers:{}});
+  assert.equal(internal.headers.Authorization,'Bearer secret-access-token');
+  const reject = [...f.responses.values()][0].err;
+  await assert.rejects(reject(denied('https://external.example/data')));
+  assert.equal(refreshCount,0);
+  eject();
+});

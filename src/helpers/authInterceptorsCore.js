@@ -3,8 +3,19 @@ import { isAuthenticationEndpoint, isPublicEndpoint } from './authRoutes.js';
 // Handles concurrent 401s with a shared refresh, and ejects on unmount.
 export function installAuthInterceptors(client, { getAccessToken, refreshToken, logout }) {
   let refreshInFlight = null;
+  const isApiRequest = (config) => {
+    // Never attach a session token to an absolute URL on another origin.
+    const base = client.defaults?.baseURL || 'http://evot.local/';
+    try {
+      const api = new URL(base, 'http://evot.local/');
+      const destination = new URL(config.url, api);
+      return api.origin === destination.origin;
+    } catch {
+      return false;
+    }
+  };
   const requestId = client.interceptors.request.use((config) => {
-    if (!isPublicEndpoint(config.url)) {
+    if (isApiRequest(config) && !isPublicEndpoint(config.url)) {
       const accessToken = getAccessToken();
       if (accessToken) {
         config.headers = config.headers ?? {};
@@ -15,7 +26,7 @@ export function installAuthInterceptors(client, { getAccessToken, refreshToken, 
   });
   const responseId = client.interceptors.response.use((response) => response, async (error) => {
     const request = error?.config;
-    if (!request || error?.response?.status !== 401 || request._retry ||
+    if (!request || !isApiRequest(request) || error?.response?.status !== 401 || request._retry ||
         isPublicEndpoint(request.url) || isAuthenticationEndpoint(request.url)) {
       return Promise.reject(error);
     }
