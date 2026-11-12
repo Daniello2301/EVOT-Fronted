@@ -5,6 +5,9 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import DiplomasViewDashboard from "./DiplomasViewDashboard";
 import StudentsViewDashboard from "./StudentsViewDashBoard";
 import InstitutionsViewDashboard from "./InstitutionsViewDashboard";
+import GraduadosViewDashboard from "./GraduadosViewDashboard";
+import SolicitudesDocumentoDashboard from "./SolicitudesDocumentoDashboard";
+import SolicitudesEdicionDashboard from "./SolicitudesEdicionDashboard";
 import PrincipalDashboard from "../components/Dashboard/principal";
 
 
@@ -27,6 +30,9 @@ const AdminDashboard = () => {
               <Route path="institutions" element={<InstitutionsViewDashboard />} />
               <Route path="my-institution" element={<InstitutionsViewDashboard />} />
               <Route path="diplomas" element={<DiplomasViewDashboard />} />
+              <Route path="graduados" element={<GraduadosViewDashboard />} />
+              <Route path="solicitudes-documento" element={<SolicitudesDocumentoDashboard />} />
+              <Route path="solicitudes-edicion" element={<SolicitudesEdicionDashboard />} />
               <Route path="students" element={<StudentsViewDashboard />} />
             </Routes>
           </div>

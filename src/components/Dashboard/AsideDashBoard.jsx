@@ -1,15 +1,19 @@
 import { Link, useLocation } from "react-router-dom";
 import { useSidebar } from "../../context/SidebarContext";
+import { useAuth } from "../../context/AuthContext";
 
 import {
   GridIcon,
   UserCircleIcon,
   Institutions,
-  Study
+  Study,
+  TaskIcon,
+  DocsIcon,
+  PencilIcon
 } from "../../icons";
 
+// roles: omitido = visible para ADMIN e INSTITUCION; si se define, solo para esos roles.
 const navItems = [
-
   {
     name: "Dashboard",
     icon: <GridIcon />,
@@ -21,14 +25,32 @@ const navItems = [
     path: "/admin-dashboard/diplomas"
   },
   {
+    name: "Graduados",
+    icon: <TaskIcon />,
+    path: "/admin-dashboard/graduados"
+  },
+  {
+    name: "Solicitudes de documentos",
+    icon: <DocsIcon />,
+    path: "/admin-dashboard/solicitudes-documento",
+    roles: ["INSTITUCION"]
+  },
+  {
+    name: "Solicitudes de edición",
+    icon: <PencilIcon />,
+    path: "/admin-dashboard/solicitudes-edicion",
+    roles: ["ADMIN"]
+  },
+  {
     name: "Estudiantes",
     icon: <UserCircleIcon />,
-    path: "/admin-dashboard/estudiantes"
+    path: "/admin-dashboard/students",
+    roles: ["ADMIN"]
   },
   {
     name: "Instituciones",
     icon: <Institutions />,
-    path: "/admin-dashboard/instituciones"
+    path: "/admin-dashboard/institutions"
   }
 
 ]
@@ -38,11 +60,13 @@ const navItems = [
 export default function AsideDashboard() {
 
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
-
+  const { authUser } = useAuth();
 
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
-
+  const visibleNavItems = navItems.filter(
+    (item) => !item.roles || item.roles.includes(authUser?.rol)
+  );
 
   return (
     <aside
@@ -69,7 +93,7 @@ export default function AsideDashboard() {
 
         {/* MENU */}
         <ul className="space-y-2 font-medium">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <li key={item.name}>
               <Link
                 to={item.path}

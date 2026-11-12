@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import DeleteModal from "../components/DeleteModal";
+import ConfirmModal from "../components/common/ConfirmModal";
 import HeadTableDiplomas from "../components/HeadTableDiplomas";
 import ReadDiplomaModal from "../components/ReadDiplomaModal";
 import UpdateDiplomaModal from "../components/UpdateDiplomaModal";
@@ -19,6 +19,8 @@ export default function DiplomasViewDashboard() {
     const [openModalEditDiploma, setOpenModalEditDiploma] = useState("" | undefined);
     const [openModalPreviewDiploma, setOpenModalPreviewDiploma] = useState("" | undefined);
     const [openModalDeleteDiploma, setOpenModalDeleteDiploma] = useState("" | undefined);
+    const [deactivating, setDeactivating] = useState(false);
+    const [deactivateError, setDeactivateError] = useState("");
 
 
     const [diplomaUpdate, setDiplomaUpdate] = useState(null)
@@ -33,6 +35,7 @@ export default function DiplomasViewDashboard() {
         setOpenModalDeleteDiploma,
         diplomas,
         setDiplomaUpdate,
+        refreshDiplomas: () => getDiplomas(),
     }
 
     const getInstitutions = async () => {
@@ -70,6 +73,20 @@ export default function DiplomasViewDashboard() {
     // Data is loaded only when the authenticated role changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [role])
+
+    const handleConfirmDeactivate = async () => {
+        setDeactivating(true);
+        setDeactivateError("");
+        try {
+            await diplomasAPI.deactivateDiploma(diplomaUpdate._id);
+            setOpenModalDeleteDiploma(undefined);
+            await getDiplomas();
+        } catch (error) {
+            setDeactivateError(error?.response?.data?.msg || "No fue posible desactivar el diploma.");
+        } finally {
+            setDeactivating(false);
+        }
+    };
 
     return (
         <>
@@ -142,7 +159,15 @@ export default function DiplomasViewDashboard() {
             {/* <!-- Read modal --> */}
             <ReadDiplomaModal props={{ openModalPreviewDiploma, setOpenModalPreviewDiploma, }} />
             {/* <!-- Delete modal --> */}
-            <DeleteModal props={{ openModalDeleteDiploma, setOpenModalDeleteDiploma }} />
+            <ConfirmModal
+                show={openModalDeleteDiploma === "openModalDelete"}
+                onClose={() => { setOpenModalDeleteDiploma(undefined); setDeactivateError(""); }}
+                onConfirm={handleConfirmDeactivate}
+                title="Desactivar diploma"
+                message={diplomaUpdate ? `¿Seguro que quieres desactivar el diploma ${diplomaUpdate.codigoDiploma}?` : ''}
+                loading={deactivating}
+                error={deactivateError}
+            />
         </>
     )
 }
