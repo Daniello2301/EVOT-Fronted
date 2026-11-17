@@ -6,7 +6,7 @@ import Backdrop from "./Backdrop";
 
 
 const LayoutContent = () => {
-    const { isExpanded, isHovered, isMobileOpen } = useSidebar();
+    const { isExpanded, isHovered } = useSidebar();
     return (
         <div className="min-h-screen xl:flex">
 
@@ -15,8 +15,7 @@ const LayoutContent = () => {
             <Sidebar />
 
             {/* Contenido */}
-            <div className={`flex-1 transition-all duration-300 ease-in-out ${isExpanded || isHovered ? "lg:ml-auto" : "lg:ml-auto"
-                } ${isMobileOpen ? "ml-0" : ""}`}>
+            <div className={`flex-1 transition-all duration-300 ease-in-out ${isExpanded || isHovered ? "lg:ml-[290px]" : "lg:ml-[90px]"}`}>
 
                 {/* Navbar */}
                 <NavDashboard />
