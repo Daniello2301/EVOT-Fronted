@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { postLoginPath } from "../helpers/authSession.js";
 
 function Login() {
   const { login } = useAuth();
@@ -18,18 +19,11 @@ function Login() {
 
     try {
       // Llamamos a la función de login del contexto de autenticación, que se encargará de hacer la llamada al backend, guardar el token y la información del usuario en el estado global, y devolver el estado pendiente (si es que hay uno guardado)
-      const estadoPendiente = await login(correo, contraseña);
-
-      // Si hay un estado pendiente guardado, redirigimos al usuario a la página que intentaba acceder originalmente
-      if (estadoPendiente) {
-        // Redirigimos al usuario a la URL que intentaba acceder originalmente, que está guardada en el estado pendiente
-        navigate(estadoPendiente.url);
-      }else {
-        // Si no hay un estado pendiente, redirigimos al usuario a la página de admin-dashboard por defecto después de iniciar sesión
-        navigate("/admin-dashboard");
-      }
+      const session = await login(correo, contraseña);
+      if (!session) throw new Error('No fue posible iniciar sesión');
+      navigate(postLoginPath(session.pending, session.user?.rol), { replace: true });
     } catch (err) {
-      const msg = err.response?.data?.msg || "Correo o contraseña incorrecta";
+      const msg = err?.response?.data?.msg || err?.message || "Correo o contraseña incorrecta";
       setError(msg);
     } finally {
       setLoading(false);

@@ -1,4 +1,5 @@
 import { axiosConfig } from '../helpers/axios.config';
+import { assertStudentRegistration } from '../helpers/studentRegistration.js';
 
 export const getAllUsuarios = async (params = {}) => {
     const res = await axiosConfig.get('users', { params });
@@ -18,7 +19,7 @@ export const createUsuario = async (data) => {
 
 export const registerStudent = async (data) => {
     const res = await axiosConfig.post('users/student', data);
-    return res.data;
+    return assertStudentRegistration(res.data);
 }
 
 export const deactivateUsuario = async (id) => {

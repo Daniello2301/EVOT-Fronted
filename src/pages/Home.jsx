@@ -48,6 +48,13 @@ const Hero = () => (
             Ver instituciones socias
           </Link>
         </div>
+        <Link
+          to="/verify"
+          aria-label="Verificar un diploma por código"
+          className="mt-4 inline-block text-sm font-medium text-blue_primary underline-offset-2 hover:underline"
+        >
+          ¿Tienes un código de diploma? Verifícalo aquí
+        </Link>
       </div>
 
       <div className="hidden lg:flex lg:col-span-5 items-center justify-center">

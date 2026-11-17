@@ -1,198 +1,124 @@
-import { createContext, useContext, useEffect, useRef, useState } from "react";
-import {
-    loginService,
-    logoutService,
-    refreshTokenService,
-} from "../services/auth.service";
+import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { jwtDecode } from 'jwt-decode';
+import { loginService, logoutService, refreshTokenService } from '../services/auth.service';
+import { setupInterceptors } from '../helpers/axiosInterceptor';
+import { userFromClaims } from '../helpers/authSession.js';
 
-import { jwtDecode } from "jwt-decode";
-import { setupInterceptors } from "../helpers/axiosInterceptor";
+const AuthContext = createContext(null);
+const REFRESH_KEY = 'REFRESH_TOKEN';
+const PENDING_KEY = 'estadoPendiente';
 
-const AuthContext = createContext();
-
-// Custom hook para usar el contexto de autenticación
 export const useAuth = () => useContext(AuthContext);
 
-// Proveedor de autenticación que envuelve la aplicación
 export const AuthProvider = ({ children }) => {
-    // Estado para almacenar el usuario autenticado y el estado de inicio de sesión
-    const [authUser, setAuthUser] = useState(null);
-    // Estado para indicar si el usuario está autenticado o no
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    // Estado para indicar si se está cargando la autenticación (útil para mostrar un spinner mientras se verifica el token)
-    const [loading, setLoading] = useState(true);
+  const [authUser, setAuthUser] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [token, setToken] = useState(null);
+  const tokenRef = useRef(null);
+  const refreshInFlight = useRef(null);
+  const generationRef = useRef(0);
 
-    const [token, setToken] = useState(null);
+  const guardarEstadoPendiente = (pending) => sessionStorage.setItem(PENDING_KEY, JSON.stringify(pending));
+  const recuperarEstadoPendiente = () => {
+    try { return JSON.parse(sessionStorage.getItem(PENDING_KEY) || 'null'); }
+    catch { sessionStorage.removeItem(PENDING_KEY); return null; }
+  };
+  const limpiarEstadoPendiente = () => sessionStorage.removeItem(PENDING_KEY);
 
-    const [, setEstadoPendiente] = useState(null);
+  const applyToken = (jwt) => {
+    const user = userFromClaims(jwtDecode(jwt));
+    tokenRef.current = jwt; // Must be synchronous for Axios requests immediately after login.
+    setToken(jwt);
+    setAuthUser(user);
+    setIsLoggedIn(true);
+    return user;
+  };
+  const clearSession = () => {
+    localStorage.removeItem(REFRESH_KEY);
+    tokenRef.current = null;
+    limpiarEstadoPendiente();
+    setToken(null);
+    setAuthUser(null);
+    setIsLoggedIn(false);
+  };
 
-    const tokenRef = useRef(null);
+  const login = async (correo, contraseña) => {
+    const generation = ++generationRef.current;
+    const data = await loginService({ correo, contraseña });
+    const jwt = data?.usuario?.tokens?.token;
+    const refreshCredential = data?.usuario?.tokens?.refreshToken;
+    if (!jwt || !refreshCredential) throw new Error('Respuesta de autenticación incompleta');
+    if (generation !== generationRef.current) return null;
+    // Validate the JWT payload before storing a refresh credential.
+    userFromClaims(jwtDecode(jwt));
+    localStorage.setItem(REFRESH_KEY, refreshCredential);
+    const user = applyToken(jwt);
+    return { pending: recuperarEstadoPendiente(), user };
+  };
 
-    
-    const guardarEstadoPendiente = (estado) => {
-        setEstadoPendiente(estado);
-        sessionStorage.setItem('estadoPendiente', JSON.stringify(estado));
-    };
+  const logout = async ({ notifyServer = true } = {}) => {
+    const generation = ++generationRef.current;
+    try { if (notifyServer && tokenRef.current) await logoutService(); }
+    catch { /* local logout still works if the server fails */ }
+    finally { if (generation === generationRef.current) clearSession(); }
+  };
 
-    
-    const recuperarEstadoPendiente = () => {
-        const estadoGuardado = sessionStorage.getItem('estadoPendiente');
-        return estadoGuardado ? JSON.parse(estadoGuardado) : null;
-    };
+  const refreshAccessToken = () => {
+    if (refreshInFlight.current) return refreshInFlight.current;
+    const generation = generationRef.current;
+    const credential = localStorage.getItem(REFRESH_KEY);
+    if (!credential) return Promise.resolve(null);
 
-    
-    const limpiarEstadoPendiente = () => {
-        setEstadoPendiente(null);
-        sessionStorage.removeItem('estadoPendiente');
-    };
-
-    // ============================================================
-    // Login
-    // ============================================================
-    const login = async (correo, contraseña) => {
-
-        const data = await loginService({ correo, contraseña });
-
-        const token = data.usuario.tokens.token;
-        // El refresh token también viene en la respuesta del backend, lo extraemos para guardarlo en localStorage
-        const refreshToken = data.usuario.tokens.refreshToken;
-
-        //decode token para obtener la información del usuario
-        const decodedToken = jwtDecode(token);
-
-        const usuario = {
-            _id: decodedToken._id,
-            nombreUsuario: decodedToken.nombreUsuario,
-            correo: decodedToken.correo,
-            rol: decodedToken.rol,
-            institucion: decodedToken.institucion,
-        };
-
-        localStorage.setItem("REFRESH_TOKEN", refreshToken);
-
-        setAuthUser(usuario);
-        setToken(token);
+    const attempt = async () => {
+      try {
+        const data = await refreshTokenService(credential);
+        if (!data?.token) throw new Error('Respuesta de renovación incompleta');
+        if (generation !== generationRef.current) return null;
+        const user = userFromClaims(jwtDecode(data.token));
+        if (data.refreshToken) localStorage.setItem(REFRESH_KEY, data.refreshToken);
+        tokenRef.current = data.token;
+        setToken(data.token);
+        setAuthUser(user);
         setIsLoggedIn(true);
-
-        return recuperarEstadoPendiente(); // Devolvemos el estado pendiente para que el componente que llamó a login pueda redirigir al usuario a la página que intentaba acceder originalmente
-    };
-
-    // ============================================================
-    // Logout
-    // ============================================================
-    const logout = async ({ notifyServer = true } = {}) => {
-        try {
-            if (notifyServer && tokenRef.current) {
-                await logoutService();
-            }
-        } catch (error) {
-            // si falla el backend igual limpiamos localmente
-        } finally {
-            localStorage.removeItem("REFRESH_TOKEN");
-            tokenRef.current = null;
-            limpiarEstadoPendiente();
-            setAuthUser(null);
-            setToken(null);
-            setIsLoggedIn(false);
+        return data.token;
+      } catch {
+        if (generation === generationRef.current) {
+          ++generationRef.current;
+          clearSession();
         }
+        return null;
+      }
     };
-    // ============================================================
-    // Refresh access token
-    // ============================================================
-    const refreshAccessToken = async () => {
-        try {
-            const refreshToken = localStorage.getItem("REFRESH_TOKEN");
-            if (!refreshToken) return null;
+    const promise = attempt().finally(() => {
+      if (refreshInFlight.current === promise) refreshInFlight.current = null;
+    });
+    refreshInFlight.current = promise;
+    return promise;
+  };
 
-            // Timeout de 10s para no quedarse colgado indefinidamente
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error("Timeout al refrescar token")), 10000)
-            );
+  useEffect(() => setupInterceptors({
+    getAccessToken: () => tokenRef.current,
+    refreshToken: refreshAccessToken,
+    logout,
+  // Interceptor closures access refs and are intentionally installed once.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), []);
 
-            const data = await Promise.race([
-                refreshTokenService(refreshToken),
-                timeoutPromise
-            ]);
-
-            const newToken = data.token;
-
-            const decodedToken = jwtDecode(newToken);
-
-            const usuario = {
-                _id: decodedToken._id,
-                nombreUsuario: decodedToken.nombreUsuario,
-                correo: decodedToken.correo,
-                rol: decodedToken.rol,
-                institucion: decodedToken.institucion,
-            }
-
-            setAuthUser(usuario);
-            setToken(newToken);
-            setIsLoggedIn(true);
-            return newToken;
-
-        } catch (error) {
-            await logout({ notifyServer: false });
-            return null;
-        }
+  useEffect(() => {
+    let mounted = true;
+    const restore = async () => {
+      try { await refreshAccessToken(); }
+      finally { if (mounted) setLoading(false); }
     };
+    restore();
+    return () => { mounted = false; };
+  // Restore on provider initialization only.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-
-    useEffect(() => {
-        tokenRef.current = token;
-    }, [token]);
-
-    // ============================================================
-    // Axios Interceptors
-    // ============================================================
-
-    useEffect(() => {
-        setupInterceptors({
-            getAccessToken: () => tokenRef.current,
-            refreshToken: refreshAccessToken,
-            logout
-        });
-    // Interceptors are registered once and read the current token from tokenRef.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-
-    // ============================================================
-    // Recuperar sesión al cargar la aplicación
-    // ============================================================
-    useEffect(() => {
-
-        const initializeAuth = async () => {
-
-            const refreshToken = localStorage.getItem("REFRESH_TOKEN");
-            if (refreshToken) {
-                await refreshAccessToken();
-            }
-            setLoading(false); // Indicamos que ya no estamos cargando la autenticación, independientemente de si se pudo recuperar la sesión o no
-
-        };
-
-        initializeAuth();
-    // Session restoration runs only during provider initialization.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    return (
-        // Proveemos el contexto de autenticación a toda la aplicación con los valores y funciones necesarias para manejar la autenticación
-        <AuthContext.Provider
-            value={{
-                authUser,
-                token,
-                isLoggedIn,
-                login,
-                logout,
-                loading,
-                guardarEstadoPendiente,
-                recuperarEstadoPendiente,
-                limpiarEstadoPendiente,
-            }}
-        >
-            {children}
-        </AuthContext.Provider>
-    );
+  return <AuthContext.Provider value={{
+    authUser, token, isLoggedIn, loading, login, logout,
+    guardarEstadoPendiente, recuperarEstadoPendiente, limpiarEstadoPendiente,
+  }}>{children}</AuthContext.Provider>;
 };

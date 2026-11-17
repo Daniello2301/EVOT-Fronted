@@ -4,6 +4,7 @@ import PublicLayout from "./layouts/PublicLayout";
 import DashboardLayout from "./layouts/DashboardLayout";
 import Home from "./pages/Home";
 import BuscarTitulo from "./pages/Diplomas";
+import VerificarDiploma from "./pages/VerificarDiploma";
 import About from "./pages/About";
 import Team from "./pages/Team";
 import Partners from "./pages/Partners";
@@ -27,6 +28,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/home" element={<Home />} />
         <Route path="/search/diploma" element={<BuscarTitulo />} />
+        <Route path="/verify" element={<VerificarDiploma />} />
         <Route path="/about" element={<About />} />
         <Route path="/team" element={<Team />} />
         <Route path="/partners" element={<Partners />} />
