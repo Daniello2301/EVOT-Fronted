@@ -86,7 +86,7 @@ function DataTable({
         {rows.map((row, index) => (
           <li key={keyFor(row, index)} className="space-y-3 p-4">
             <div className="text-base font-semibold text-black_primary">{cellValue(primary, row)}</div>
-            <dl className="grid grid-cols-1 gap-x-4 gap-y-2 min-[420px]:grid-cols-2">
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
               {detailColumns.map((column) => (
                 <div key={column.header} className="min-w-0">
                   <dt className="text-xs font-medium uppercase tracking-wide text-gray-500">{column.header}</dt>

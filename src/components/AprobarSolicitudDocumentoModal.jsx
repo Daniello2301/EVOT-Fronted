@@ -5,7 +5,13 @@ import { inputClass } from './common/ui';
 import { aprobarSolicitudDocumento } from '../services/solicitudes.service';
 import { apiErrorMessage } from '../helpers/apiResponse.js';
 import { localInputDate } from '../helpers/formatters.js';
-import { MAX_EXPIRACION_MESES, formatBytes, maxExpiracionInputDate, validateAprobacion } from '../helpers/solicitudModel.js';
+
+const defaultExpiracion = () => {
+    const sugerida = localInputDate(30);
+    const max = maxExpiracionInputDate();
+    return sugerida > max ? max : sugerida;
+};
+import { MAX_EXPIRACION_MESES, formatBytes, maxExpiracionInputDate, minExpiracionInputDate, validateAprobacion } from '../helpers/solicitudModel.js';
 
 /** Aprobar una solicitud de documento: subir el PDF oficial y fijar su vigencia. */
 function AprobarSolicitudDocumentoModal({ solicitud, onClose, onAprobado }) {
@@ -19,7 +25,7 @@ function AprobarSolicitudDocumentoModal({ solicitud, onClose, onAprobado }) {
     useEffect(() => {
         if (solicitud) {
             setArchivo(null);
-            setFechaExpiracion(localInputDate(30) <= maxExpiracionInputDate() ? localInputDate(30) : maxExpiracionInputDate());
+            setFechaExpiracion(defaultExpiracion());
             setErrors({});
             setError('');
             if (fileRef.current) fileRef.current.value = '';
@@ -89,14 +95,14 @@ function AprobarSolicitudDocumentoModal({ solicitud, onClose, onAprobado }) {
             </FormField>
             <FormField
                 id="aprobar-fechaExpiracion"
-                label="Disponible hasta"
+                label="Vence el"
                 required
                 error={errors.fechaExpiracion}
-                hint={`Hasta ese día la institución podrá descargarlo. Máximo ${MAX_EXPIRACION_MESES} meses.`}
+                hint={`El documento deja de estar disponible al comenzar ese día. Desde mañana y hasta ${MAX_EXPIRACION_MESES} meses.`}
             >
                 <input
                     type="date"
-                    min={localInputDate(0)}
+                    min={minExpiracionInputDate()}
                     max={maxExpiracionInputDate()}
                     className={inputClass}
                     value={fechaExpiracion}

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useSidebar } from "../../context/SidebarContext";
 import { useAuth } from "../../context/AuthContext";
-import { dashboardPath, isActivePath, sectionsForRole } from "../../helpers/dashboardNav.js";
+import { dashboardPath, isActivePath, needsInstitucionOnboarding, sectionsForRole } from "../../helpers/dashboardNav.js";
 import {
   GridIcon,
   UserCircleIcon,
@@ -10,8 +10,7 @@ import {
   Study,
   TaskIcon,
   DocsIcon,
-  PencilIcon,
-  PageIcon
+  PencilIcon
 } from "../../icons";
 
 const ICONS = {
@@ -22,14 +21,17 @@ const ICONS = {
   "solicitudes-edicion": PencilIcon,
   instituciones: Institutions,
   usuarios: UserCircleIcon,
-  "mi-institucion": PageIcon
+  "mi-institucion": Institutions
 };
 
 export default function AsideDashboard() {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered, closeMobileSidebar } = useSidebar();
   const { authUser } = useAuth();
   const location = useLocation();
-  const sections = sectionsForRole(authUser?.rol);
+  // Mientras la institución no esté registrada, el resto de secciones solo redirige al alta.
+  const sections = needsInstitucionOnboarding(authUser)
+    ? sectionsForRole(authUser?.rol).filter((section) => section.key === "mi-institucion")
+    : sectionsForRole(authUser?.rol);
   const showLabels = isExpanded || isHovered || isMobileOpen;
 
   // Al navegar en móvil, cerrar el panel.

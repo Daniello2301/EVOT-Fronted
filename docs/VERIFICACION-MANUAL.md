@@ -59,7 +59,7 @@ Ejecutar contra el entorno de pruebas, con datos ficticios, en 375 px (móvil), 
 5. Solicitudes de documentos:
    - El filtro de estado funciona.
    - "Ver" muestra el detalle.
-   - "Aprobar" rechaza archivos que no son PDF y archivos de más de 10 MB. Acepta como fecha hoy y hasta 3 meses.
+   - "Aprobar" rechaza archivos que no son PDF y archivos de más de 10 MB. La fecha de vencimiento va desde mañana hasta 3 meses: el backend solo acepta `aaaa-mm-dd` y la toma como medianoche UTC.
    - "Rechazar" pide confirmación.
    - "Descargar PDF" descarga el documento aprobado (ver la nota sobre Cloudinary).
 
@@ -74,6 +74,8 @@ Ejecutar contra el entorno de pruebas, con datos ficticios, en 375 px (móvil), 
    - Editar, desactivar y reactivar funcionan.
 4. Solicitudes de edición: aprobar muestra hasta cuándo es editable el diploma, y rechazar también funciona.
 5. El inicio muestra los totales reales y la bandeja de pendientes. Si un servicio falla, aparece "—" con la opción "Reintentar".
+
+**Requisito para aprobar y descargar:** el backend necesita credenciales reales de Cloudinary. Con los valores de ejemplo del `.env` (`tu_api_key`), aprobar responde 500.
 
 **Nota sobre la descarga del PDF:**
 - `GET solicitudes-documento/:id/descargar` responde con un 302 hacia una URL firmada de Cloudinary. El navegador la sigue con una petición CORS.
