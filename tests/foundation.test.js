@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { apiErrorMessage, cleanParams, extractPage, emptyPage, isNotFound } from '../src/helpers/apiResponse.js';
 import { formatDate, toInputDate, localInputDate, isInputDate, fullName } from '../src/helpers/formatters.js';
 import { describeEstado, describeActivo, ESTADOS_DOCUMENTO, ESTADOS_EDICION, rolLabel } from '../src/helpers/estados.js';
-import { canAccessSection, sectionsForRole, sectionByKey, isActivePath, currentSection, dashboardPath } from '../src/helpers/dashboardNav.js';
+import { canAccessSection, sectionsForRole, sectionByKey, isActivePath, currentSection, dashboardPath, needsInstitucionOnboarding } from '../src/helpers/dashboardNav.js';
 import { validatePasswordChange } from '../src/helpers/passwordChange.js';
 
 test('extractPage normalizes paged, bare-array and malformed payloads', () => {
@@ -73,6 +73,13 @@ test('dashboard sections are filtered by role and guard URL access', () => {
   assert.equal(canAccessSection(sectionByKey('usuarios'), 'INSTITUCION'), false);
   assert.equal(canAccessSection(null, 'ADMIN'), false);
   assert.equal(dashboardPath('users'), '/admin-dashboard/users');
+});
+
+test('institution users without an institution must finish onboarding first', () => {
+  assert.equal(needsInstitucionOnboarding({ rol: 'INSTITUCION', institucion: null }), true);
+  assert.equal(needsInstitucionOnboarding({ rol: 'INSTITUCION', institucion: 'i1' }), false);
+  assert.equal(needsInstitucionOnboarding({ rol: 'ADMIN', institucion: null }), false);
+  assert.equal(needsInstitucionOnboarding(null), false);
 });
 
 test('active path matching keeps Inicio exact and sections prefix-based', () => {

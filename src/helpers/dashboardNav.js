@@ -21,6 +21,12 @@ export const DASHBOARD_SECTIONS = Object.freeze([
 
 export const canAccessSection = (section, rol) => Boolean(section && rol && section.roles.includes(rol));
 
+/**
+ * Un usuario INSTITUCION sin institución asociada recibe 403 en todo el API
+ * ("Usuario sin institución asignada") hasta registrarla en "Mi institución".
+ */
+export const needsInstitucionOnboarding = (user) => user?.rol === ROLES.INSTITUCION && !user?.institucion;
+
 export const sectionsForRole = (rol) => DASHBOARD_SECTIONS.filter((section) => canAccessSection(section, rol));
 
 export const sectionByKey = (key) => DASHBOARD_SECTIONS.find((section) => section.key === key) ?? null;

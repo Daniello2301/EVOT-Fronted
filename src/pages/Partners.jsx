@@ -9,7 +9,7 @@ export default function Partners() {
 
         API.getActivePartners()
             .then((res) => {
-                setPartners(res?.data)
+                setPartners(Array.isArray(res) ? res : [])
             })
             .catch((err) => {
                 console.log(err);
