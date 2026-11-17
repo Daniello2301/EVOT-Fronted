@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { postLoginPath } from "../helpers/authSession.js";
+import Notice from "./common/Notice";
 
 function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const notice = typeof location.state?.notice === "string" ? location.state.notice : "";
 
   const [correo, setCorreo] = useState("");
   const [contraseña, setContraseña] = useState("");
@@ -45,6 +48,8 @@ function Login() {
           <h1 className="text-center text-xl font-bold leading-tight tracking-tight text-blue_primary md:text-2xl">
             Ingresa a tu cuenta
           </h1>
+
+          {notice && <Notice tone="success">{notice}</Notice>}
 
           <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
             <div>

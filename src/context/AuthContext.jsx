@@ -119,6 +119,9 @@ export const AuthProvider = ({ children }) => {
 
   return <AuthContext.Provider value={{
     authUser, token, isLoggedIn, loading, login, logout,
+    // Renueva el access token desde el usuario guardado en el servidor
+    // (p. ej. después de crear la institución, para que el JWT la incluya).
+    refreshSession: refreshAccessToken,
     guardarEstadoPendiente, recuperarEstadoPendiente, limpiarEstadoPendiente,
   }}>{children}</AuthContext.Provider>;
 };

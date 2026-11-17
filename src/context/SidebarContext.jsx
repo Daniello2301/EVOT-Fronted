@@ -1,7 +1,11 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 
+// Un solo punto de corte para todo el panel: lg (1024px).
+// Por debajo, la barra lateral es un panel deslizable (isMobileOpen);
+// por encima, se expande (290px) o colapsa (90px).
+export const DESKTOP_BREAKPOINT = 1024;
 
-const SidebarContext = createContext();
+const SidebarContext = createContext(null);
 
 export const useSidebar = () => {
     const context = useContext(SidebarContext);
@@ -11,60 +15,52 @@ export const useSidebar = () => {
     return context;
 };
 
-export const SidebarProvider = ({ children }) => {
+const isDesktopWidth = () => typeof window !== "undefined" && window.innerWidth >= DESKTOP_BREAKPOINT;
 
+export const SidebarProvider = ({ children }) => {
     const [isExpanded, setIsExpanded] = useState(true);
     const [isMobileOpen, setIsMobileOpen] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
+    const [isDesktop, setIsDesktop] = useState(isDesktopWidth);
     const [isHovered, setIsHovered] = useState(false);
-    const [activeItem, setActiveItem] = useState(null);
-    const [openSubmenu, setOpenSubmenu] = useState(null);
 
     useEffect(() => {
-
         const handleResize = () => {
-            const mobile = window.innerWidth < 768;
-            setIsMobile(mobile);
-            if (!mobile) {
-                setIsMobileOpen(false);
-            }
+            const desktop = isDesktopWidth();
+            setIsDesktop(desktop);
+            if (desktop) setIsMobileOpen(false);
         };
-
         handleResize();
         window.addEventListener("resize", handleResize);
-
         return () => window.removeEventListener("resize", handleResize);
-
     }, []);
 
+    // Escape cierra el panel móvil.
+    useEffect(() => {
+        if (!isMobileOpen) return undefined;
+        const onKeyDown = (event) => { if (event.key === "Escape") setIsMobileOpen(false); };
+        document.addEventListener("keydown", onKeyDown);
+        return () => document.removeEventListener("keydown", onKeyDown);
+    }, [isMobileOpen]);
 
-    const toggleSidebar = () => {
-        setIsExpanded((prev) => !prev);
-    }
+    const toggleSidebar = useCallback(() => {
+        if (isDesktopWidth()) setIsExpanded((prev) => !prev);
+        else setIsMobileOpen((prev) => !prev);
+    }, []);
 
-    const toggleMobileSidebar = () => {
-        setIsMobileOpen((prev) => !prev);
-    }
-
-    const toggleSubmenu = (item) => {
-        setOpenSubmenu((prev) => (prev === item ? null : item));
-    }
+    const closeMobileSidebar = useCallback(() => setIsMobileOpen(false), []);
 
     return (
         <SidebarContext.Provider value={{
-            isExpanded: isMobile ? false : isExpanded,
+            isExpanded: isDesktop ? isExpanded : false,
             isMobileOpen,
+            isDesktop,
             isHovered,
-            activeItem,
-            openSubmenu,
             toggleSidebar,
-            toggleMobileSidebar,
-            toggleSubmenu,
-            setActiveItem,
+            toggleMobileSidebar: toggleSidebar,
+            closeMobileSidebar,
             setIsHovered
         }}>
             {children}
         </SidebarContext.Provider>
     );
-
-}
+};
