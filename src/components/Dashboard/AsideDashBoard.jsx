@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useSidebar } from "../../context/SidebarContext";
 import { useAuth } from "../../context/AuthContext";
+import Logo from "../../assets/logo1.webp";
 import { dashboardPath, isActivePath, needsInstitucionOnboarding, sectionsForRole } from "../../helpers/dashboardNav.js";
 import {
   GridIcon,
@@ -51,9 +52,10 @@ export default function AsideDashboard() {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className={`flex h-16 shrink-0 items-center border-b border-gray-100 px-5 ${showLabels ? "justify-start" : "justify-center"}`}>
-        <Link to={dashboardPath()} className="flex items-center gap-2 rounded-lg font-display text-xl font-bold text-blue_primary">
-          <span aria-hidden="true" className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-blue_primary text-sm text-white">EV</span>
-          {showLabels && <span>EVOT</span>}
+        <Link to={dashboardPath()} className="flex min-h-[44px] items-center gap-2 rounded-lg font-display text-xl font-semibold tracking-tight text-blue_primary">
+          {/* Mismo logo y nombre que la barra del sitio público. */}
+          <img src={Logo} alt="" width="36" height="36" className="h-9 w-9 shrink-0 object-contain" />
+          {showLabels && <span className="whitespace-nowrap">Evot Project</span>}
           <span className="sr-only">Ir al inicio del panel</span>
         </Link>
       </div>
