@@ -1,7 +1,7 @@
 import { useAuth } from "../context/AuthContext";
 import { Navigate, Route, Routes } from "react-router-dom";
 import DiplomasViewDashboard from "./DiplomasViewDashboard";
-import StudentsViewDashboard from "./StudentsViewDashBoard";
+import UsuariosAdmin from "./UsuariosAdmin";
 import InstitucionesAdmin from "./InstitucionesAdmin";
 import MiInstitucion from "./MiInstitucion";
 import GraduadosViewDashboard from "./GraduadosViewDashboard";
@@ -18,7 +18,7 @@ const SECTION_ELEMENTS = {
   "solicitudes-documento": SolicitudesDocumentoDashboard,
   "solicitudes-edicion": SolicitudesEdicionDashboard,
   instituciones: InstitucionesAdmin,
-  usuarios: StudentsViewDashboard,
+  usuarios: UsuariosAdmin,
   "mi-institucion": MiInstitucion
 };
 
