@@ -1,219 +1,157 @@
-import { Link } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useCallback, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import PageMeta from '../common/PageMeta';
+import Notice from '../common/Notice';
+import { btnNeutral, btnPrimary, btnSecondary } from '../common/ui';
+import { useAuth } from '../../context/AuthContext';
+import { getAllInstituciones } from '../../services/institucions.service';
+import { getAllUsuarios } from '../../services/usuarios.service';
+import { getAllGraduados } from '../../services/graduado.service';
+import { getDiplomasByInstitution } from '../../services/diplomas.service';
+import { getSolicitudesDocumento, getSolicitudesEdicion } from '../../services/solicitudes.service';
+import { extractPage } from '../../helpers/apiResponse.js';
+import { ROLES, rolLabel } from '../../helpers/estados.js';
+import { formatDateTime, formatNumber } from '../../helpers/formatters.js';
+import { dashboardPath } from '../../helpers/dashboardNav.js';
+import { greeting, pendingQueueForRole, statValue, statsForRole } from '../../helpers/dashboardStats.js';
 
-const monthlyRequests = [
-	{ month: "Ene", value: 64 },
-	{ month: "Feb", value: 92 },
-	{ month: "Mar", value: 108 },
-	{ month: "Abr", value: 86 },
-	{ month: "May", value: 124 },
-	{ month: "Jun", value: 97 }
-];
-
-const approvalByType = [
-	{ name: "Diplomas", value: 58, color: "#0ea5e9" },
-	{ name: "Certificados", value: 27, color: "#0284c7" },
-	{ name: "Constancias", value: 15, color: "#38bdf8" }
-];
-
-const quickActionsByRole = {
-	ADMIN: [
-		{ title: "Gestionar usuarios", detail: "Crear, activar y desactivar usuarios", to: "students" },
-		{ title: "Gestionar instituciones", detail: "Administrar instituciones del sistema", to: "institutions" },
-		{ title: "Gestionar diplomas", detail: "Editar y validar diplomas globales", to: "diplomas" },
-		{ title: "Descargar reporte", detail: "Exportar resumen mensual", to: "diplomas" }
-	],
-	INSTITUCION: [
-		{ title: "Mi institución", detail: "Actualizar datos de tu institución", to: "my-institution" },
-		{ title: "Mis diplomas", detail: "Gestionar diplomas de tu institución", to: "diplomas" },
-		{ title: "Revisar solicitudes", detail: "Atender solicitudes asociadas", to: "diplomas" }
-	]
+const SOURCES = {
+  instituciones: getAllInstituciones,
+  usuarios: getAllUsuarios,
+  graduados: getAllGraduados,
+  diplomasInstitucion: getDiplomasByInstitution,
+  solicitudesEdicion: getSolicitudesEdicion,
+  solicitudesDocumento: getSolicitudesDocumento
 };
 
-const maxRequests = Math.max(...monthlyRequests.map((item) => item.value));
+const QUICK_ACTIONS = {
+  [ROLES.ADMIN]: [
+    { label: 'Crear usuario', to: dashboardPath('users'), primary: true },
+    { label: 'Revisar instituciones', to: dashboardPath('institutions') },
+    { label: 'Ver diplomas', to: dashboardPath('diplomas') }
+  ],
+  [ROLES.INSTITUCION]: [
+    { label: 'Registrar diploma', to: dashboardPath('diplomas'), primary: true },
+    { label: 'Registrar graduado', to: dashboardPath('graduados') },
+    { label: 'Mi institución', to: dashboardPath('my-institution') }
+  ]
+};
 
+function StatCard({ stat, value, loading }) {
+  const highlight = stat.attention && value > 0;
+  return (
+    <Link
+      to={stat.href}
+      className={`evot-surface-card block p-5 ${highlight ? 'ring-2 ring-amber-400' : ''}`}
+      aria-label={`${stat.label}: ${loading ? 'cargando' : value ?? 'no disponible'}`}
+    >
+      <p className="text-sm font-medium text-slate-600">{stat.label}</p>
+      {loading ? (
+        <div aria-hidden="true" className="mt-3 h-9 w-20 animate-pulse rounded bg-gray-200" />
+      ) : (
+        <p className="mt-2 font-display text-3xl font-bold tabular-nums text-black_primary">{value === null ? '—' : formatNumber(value)}</p>
+      )}
+      <p className={`mt-2 text-xs font-semibold ${highlight ? 'text-amber-800' : 'text-blue_primary'}`}>
+        {highlight ? 'Requiere tu revisión →' : 'Ver detalle →'}
+      </p>
+    </Link>
+  );
+}
+
+/** Inicio del panel: indicadores reales, pendientes y accesos rápidos por rol. */
 export default function PrincipalDashboard() {
-	const { authUser } = useAuth();
-	const role = authUser?.rol;
-	const isAdmin = role === "ADMIN";
-	const isInstitution = role === "INSTITUCION";
-	const quickActions = quickActionsByRole[role] ?? [];
+  const { authUser } = useAuth();
+  const rol = authUser?.rol;
+  const stats = statsForRole(rol);
+  const queue = pendingQueueForRole(rol);
+  const [values, setValues] = useState({});
+  const [pending, setPending] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [partialError, setPartialError] = useState(false);
 
-	const donutStops = [
-		`#0ea5e9 0% ${approvalByType[0].value}%`,
-		`#0284c7 ${approvalByType[0].value}% ${approvalByType[0].value + approvalByType[1].value}%`,
-		`#38bdf8 ${approvalByType[0].value + approvalByType[1].value}% 100%`
-	].join(", ");
+  const load = useCallback(async () => {
+    setLoading(true);
+    setPartialError(false);
+    const requests = stats.map((stat) => SOURCES[stat.source](stat.params));
+    const queueRequest = queue ? SOURCES[queue.source](queue.params) : Promise.resolve(null);
+    const [queueResult, ...results] = await Promise.allSettled([queueRequest, ...requests]);
+    const nextValues = {};
+    stats.forEach((stat, index) => { nextValues[stat.key] = statValue(results[index]); });
+    setValues(nextValues);
+    setPending(queueResult.status === 'fulfilled' && queueResult.value ? extractPage(queueResult.value).results : []);
+    setPartialError(Object.values(nextValues).some((value) => value === null) || (queueResult.status === 'rejected' && queueResult.reason?.response?.status !== 404));
+    setLoading(false);
+  // stats/queue dependen solo del rol.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rol]);
 
-	return (
-		<section className="min-h-screen bg-slate-50 p-3 md:p-6">
-			<div className="mx-auto w-full max-w-7xl space-y-6">
-				<header className="relative overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-br bg-blue_primary  p-6 text-white shadow-xl">
-					
-					<p className="text-xs uppercase tracking-[0.22em] text-cyan-100">Centro de Gestión</p>
-					<h1 className="mt-2 text-2xl font-black md:text-4xl">Panel de administración general</h1>
-					<p className="mt-2 max-w-2xl text-sm text-blue-50 md:text-base">
-						{isAdmin
-							? "Controla usuarios, instituciones y diplomas desde un panel centralizado."
-							: "Gestiona tu institución y administra únicamente los diplomas de tu entidad."}
-					</p>
-					<div className="mt-4 inline-flex rounded-full bg-white/15 px-3 py-1 text-xs font-semibold tracking-wide text-cyan-50">
-						Rol activo: {role ?? "SIN ROL"}
-					</div>
-				</header>
+  useEffect(() => { load(); }, [load]);
 
-				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-					<article className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
-						<p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Graduados</p>
-						<p className="mt-2 text-3xl font-extrabold text-slate-900">126</p>
-						<p className="mt-1 text-xs text-emerald-600">+12% vs ayer</p>
-					</article>
+  const nombre = authUser?.nombreUsuario || authUser?.correo || '';
+  const isAdmin = rol === ROLES.ADMIN;
 
-					<article className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
-						<p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Instituciones</p>
-						<p className="mt-2 text-3xl font-extrabold text-slate-900">97</p>
-						<p className="mt-1 text-xs text-emerald-600">77% completado</p>
-					</article>
+  return (
+    <section className="mx-auto w-full max-w-screen-xl space-y-6">
+      <PageMeta title="Inicio | EVOT" description="Resumen de la actividad en EVOT." />
 
-					<article className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
-						<p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Diplomas</p>
-						<p className="mt-2 text-3xl font-extrabold text-slate-900">29</p>
-						<p className="mt-1 text-xs text-amber-600">Requieren revisión</p>
-					</article>
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-medium text-blue_primary">{rolLabel(rol)}</p>
+          <h1 className="font-display text-2xl font-bold text-black_primary sm:text-3xl">{greeting()}{nombre ? `, ${nombre}` : ''}</h1>
+          <p className="mt-1 text-sm text-slate-600 sm:text-base">
+            {isAdmin ? 'Así va EVOT hoy.' : 'Así va tu institución en EVOT hoy.'}
+          </p>
+        </div>
+        <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-3 sm:flex">
+          {(QUICK_ACTIONS[rol] ?? []).map((action) => (
+            <Link key={action.label} to={action.to} className={action.primary ? btnPrimary : btnSecondary}>{action.label}</Link>
+          ))}
+        </div>
+      </header>
 
-					<article className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
-						<p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Instituciones activas</p>
-						<p className="mt-2 text-3xl font-extrabold text-slate-900">41</p>
-						<p className="mt-1 text-xs text-sky-700">Cobertura nacional</p>
-					</article>
-				</div>
+      {partialError && !loading && (
+        <Notice tone="warning" action={<button type="button" className={btnNeutral} onClick={load}>Reintentar</button>}>
+          Algunos datos no se pudieron cargar. Los valores con “—” no están disponibles en este momento.
+        </Notice>
+      )}
 
-				<div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-					<article className="xl:col-span-2 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-						<div className="mb-4 flex items-center justify-between">
-							<h2 className="text-lg font-bold text-slate-900">{
-                                isAdmin 
-                                ? "Registros por mes"
-                                : "Solicitudes por mes"
+      <div className="grid grid-cols-1 gap-4 min-[420px]:grid-cols-2 xl:grid-cols-4">
+        {stats.map((stat) => <StatCard key={stat.key} stat={stat} value={values[stat.key] ?? null} loading={loading} />)}
+      </div>
 
-                                }</h2>
-							<span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">Últimos 6 meses</span>
-						</div>
-
-						<div className="flex h-56 items-end gap-3 border-b border-l border-slate-200 px-3 pb-3 pt-4">
-							{monthlyRequests.map((item) => {
-								const height = Math.max(16, (item.value / maxRequests) * 180);
-								return (
-									<div className="flex flex-1 flex-col items-center gap-2" key={item.month}>
-										<span className="text-[11px] font-semibold text-slate-500">{item.value}</span>
-										<div
-											className="w-full rounded-t-lg bg-[#9CD5FF]"
-											style={{ height: `${height}px` }}
-										/>
-										<span className="text-xs font-medium text-slate-600">{item.month}</span>
-									</div>
-								);
-							})}
-						</div>
-					</article>
-
-					<article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-						<h2 className="text-lg font-bold text-slate-900">Distribución por tipo</h2>
-						<div className="mt-4 flex items-center justify-center">
-							<div
-								className="relative h-40 w-40 rounded-full"
-								style={{ background: `conic-gradient(${donutStops})` }}
-							>
-								<div className="absolute inset-6 grid place-items-center rounded-full bg-white text-center">
-									<p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Aprobación</p>
-									<p className="text-2xl font-black text-slate-900">91%</p>
-								</div>
-							</div>
-						</div>
-
-						<ul className="mt-5 space-y-2">
-							{approvalByType.map((item) => (
-								<li className="flex items-center justify-between" key={item.name}>
-									<div className="flex items-center gap-2">
-										<span className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
-										<span className="text-sm font-medium text-slate-700">{item.name}</span>
-									</div>
-									<span className="text-sm font-bold text-slate-900">{item.value}%</span>
-								</li>
-							))}
-						</ul>
-					</article>
-				</div>
-
-				<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-					<article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-						<div className="mb-4 flex items-center justify-between">
-							<h2 className="text-lg font-bold text-slate-900">Gestión operativa</h2>
-							<span className="text-xs font-medium text-slate-500">Prioridad del día</span>
-						</div>
-
-						<div className="space-y-3">
-							<div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
-								<p className="text-sm font-semibold text-amber-700">Pendiente crítico</p>
-								<p className="mt-1 text-sm text-slate-700">14 solicitudes llevan más de 48 horas sin aprobación.</p>
-							</div>
-							<div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
-								<p className="text-sm font-semibold text-emerald-700">Servicio estable</p>
-								<p className="mt-1 text-sm text-slate-700">Tiempo promedio de respuesta: 1.6 segundos.</p>
-							</div>
-							<div className="rounded-xl border border-sky-200 bg-sky-50 p-3">
-								<p className="text-sm font-semibold text-sky-700">Meta semanal</p>
-								<p className="mt-1 text-sm text-slate-700">Completar 320 validaciones documentales.</p>
-							</div>
-						</div>
-					</article>
-
-					<article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-						<h2 className="text-lg font-bold text-slate-900">Acciones rápidas</h2>
-						<ul className="mt-4 space-y-3">
-							{quickActions.map((item) => (
-								<li
-									className="group flex items-center justify-between rounded-xl border border-slate-200 p-3 transition hover:border-blue-300 hover:bg-blue-50"
-									key={item.title}
-								>
-									<div>
-										<p className="text-sm font-semibold text-slate-800">{item.title}</p>
-										<p className="text-xs text-slate-500">{item.detail}</p>
-									</div>
-									<Link
-										className="rounded-lg bg-blue_primary px-3 py-1.5 text-xs font-semibold text-white transition group-hover:bg-blue_dark"
-										to={item.to}
-									>
-										Abrir
-									</Link>
-								</li>
-							))}
-						</ul>
-					</article>
-				</div>
-
-				<article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-					<h2 className="text-lg font-bold text-slate-900">Permisos del rol</h2>
-					<ul className="mt-4 grid gap-2 text-sm text-slate-700 md:grid-cols-2">
-						<li className="rounded-lg border border-slate-200 p-3">
-							<span className="font-semibold text-slate-900">Usuarios:</span>{" "}
-							{isAdmin ? "Acceso total" : "Sin acceso"}
-						</li>
-						<li className="rounded-lg border border-slate-200 p-3">
-							<span className="font-semibold text-slate-900">Instituciones:</span>{" "}
-							{isAdmin ? "Gestión global" : "Solo mi institución"}
-						</li>
-						<li className="rounded-lg border border-slate-200 p-3">
-							<span className="font-semibold text-slate-900">Diplomas:</span>{" "}
-							{isAdmin ? "Todos los diplomas" : "Solo diplomas de mi institución"}
-						</li>
-						<li className="rounded-lg border border-slate-200 p-3">
-							<span className="font-semibold text-slate-900">Auditoría:</span>{" "}
-							{isAdmin || isInstitution ? "Visible" : "No disponible"}
-						</li>
-					</ul>
-				</article>
-			</div>
-		</section>
-	);
+      {queue && (
+        <section aria-labelledby="pendientes-title" className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-evot-card">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-200 px-4 py-3 sm:px-5">
+            <h2 id="pendientes-title" className="font-display text-lg font-semibold text-black_primary">{queue.title}</h2>
+            <Link to={queue.href} className="inline-flex min-h-[44px] items-center text-sm font-semibold text-blue_primary hover:underline">Ver todas</Link>
+          </div>
+          {loading ? (
+            <div aria-hidden="true" className="space-y-3 p-5">
+              {[0, 1, 2].map((row) => <div key={row} className="h-10 animate-pulse rounded bg-gray-100" />)}
+            </div>
+          ) : pending.length === 0 ? (
+            <p className="px-5 py-8 text-center text-sm text-slate-600">No tienes nada pendiente por revisar. 👍</p>
+          ) : (
+            <ul className="divide-y divide-gray-100">
+              {pending.map((item) => (
+                <li key={item._id} className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-gray-900">
+                      {isAdmin ? (item.diploma?.codigoDiploma ?? 'Diploma') : `${item.nombres ?? ''} ${item.apellidos ?? ''}`.trim()}
+                    </p>
+                    <p className="truncate text-xs text-gray-500">
+                      {isAdmin
+                        ? `${item.solicitadoPor?.nombreUsuario ?? 'Institución'} · ${item.motivoSolicitud ?? ''}`
+                        : `Diploma ${item.diploma?.codigoDiploma ?? '—'} · ${item.correoSolicitante ?? ''}`}
+                    </p>
+                  </div>
+                  <p className="shrink-0 text-xs text-gray-500">{formatDateTime(item.createdAt)}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+    </section>
+  );
 }

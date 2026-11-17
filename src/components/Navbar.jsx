@@ -162,9 +162,17 @@ function Navbar() {
                     to="/search/diploma"
                     onClick={() => setIsMenuOpen(false)}
                     className="text-black_primary hover:underline"
-                    aria-current="page"
                   >
-                    Buscar titulos
+                    Buscar títulos
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/verify"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-black_primary hover:underline"
+                  >
+                    Verificar diploma
                   </Link>
                 </li>
                 <li>

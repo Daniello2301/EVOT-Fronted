@@ -2,8 +2,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import * as diplomasAPI from '../services/diplomas.service';
 import { diplomaError, diplomaId, extractDiploma, extractDiplomaList, filterDiplomas } from '../helpers/diplomaModel.js';
-import HeadTableDiplomas from '../components/HeadTableDiplomas';
-import AdminDiplomasTable from '../components/AdminDiplomasTable';
+import CreateDiplomaModal from '../components/CreateDiplomaModal';
+import PageShell from '../components/common/PageShell';
+import DataTable from '../components/common/DataTable';
+import Pagination from '../components/common/Pagination';
+import FormField from '../components/common/FormField';
+import Notice from '../components/common/Notice';
+import StatusBadge from '../components/common/StatusBadge';
+import { btnLink, btnLinkDanger, btnPrimary, inputClass } from '../components/common/ui';
+import { describeActivo } from '../helpers/estados.js';
+import { isNotFound } from '../helpers/apiResponse.js';
+import { formatDate, fullName } from '../helpers/formatters.js';
 import UpdateDiplomaModal from '../components/UpdateDiplomaModal';
 import ReadDiplomaModal from '../components/ReadDiplomaModal';
 import DeleteModal from '../components/DeleteModal';
@@ -25,6 +34,7 @@ export default function DiplomasViewDashboard() {
   const [selected, setSelected] = useState(null);
   const [modal, setModal] = useState(null);
   const [openingEdit, setOpeningEdit] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -47,7 +57,10 @@ export default function DiplomasViewDashboard() {
       } catch (err) {
         if (active) {
           setDiplomas([]);
-          setError(diplomaError(err, 'No fue posible consultar los diplomas.'));
+          setServerTotal(0);
+          setServerPages(1);
+          // El API responde 404 cuando no hay diplomas: es una lista vacía, no un fallo.
+          if (!isNotFound(err)) setError(diplomaError(err, 'No fue posible consultar los diplomas.'));
         }
       } finally {
         if (active) setLoading(false);
@@ -88,37 +101,93 @@ export default function DiplomasViewDashboard() {
     }
   };
 
+  const isAdmin = role === 'ADMIN';
+  const columns = [
+    {
+      header: 'Diploma',
+      primary: true,
+      render: (row) => (
+        <div className="min-w-0">
+          <p className="font-semibold text-gray-900">{row.nombrePrograma || '—'}</p>
+          <p className="text-xs text-gray-500">{[row.codigoDiploma, row.nivelPrograma].filter(Boolean).join(' · ')}</p>
+        </div>
+      )
+    },
+    {
+      header: 'Graduado',
+      render: (row) => (
+        <span>
+          {row.graduado ? fullName(row.graduado) : '—'}
+          {row.graduado?.numeroDocumento && <span className="block text-xs text-gray-500">{row.graduado.numeroDocumento}</span>}
+        </span>
+      )
+    },
+    ...(isAdmin ? [{ header: 'Institución', key: 'institucion.nombreInstitucion' }] : []),
+    { header: 'Fecha de grado', render: (row) => formatDate(row.fechaGrados) },
+    ...(diplomas.some((d) => typeof d.estado === 'boolean') ? [{ header: 'Estado', render: (row) => <StatusBadge {...describeActivo(row.estado)} /> }] : []),
+    {
+      header: 'Acciones',
+      actions: true,
+      render: (row) => (
+        <>
+          <button type="button" className={btnLink} disabled={openingEdit} onClick={() => openDetail(row, 'preview')} aria-label={`Ver diploma ${row.codigoDiploma ?? ''}`}>Ver</button>
+          <button type="button" className={btnLink} disabled={openingEdit || !diplomaId(row)} onClick={() => openDetail(row, 'edit')} aria-label={`Editar diploma ${row.codigoDiploma ?? ''}`}>Editar</button>
+          {isAdmin && row.estado !== false && (
+            <button type="button" className={btnLinkDanger} disabled={openingEdit || !diplomaId(row)} onClick={() => { setSelected(row); setModal('deactivate'); }} aria-label={`Desactivar diploma ${row.codigoDiploma ?? ''}`}>Desactivar</button>
+          )}
+        </>
+      )
+    }
+  ];
+
   return (
-    <section className="min-h-[30rem] bg-gray-50 p-4 sm:p-6">
-      <div className="mx-auto max-w-screen-xl overflow-hidden rounded-xl bg-white shadow-sm">
-        <HeadTableDiplomas search={search} onSearch={onSearch} onSaved={onSaved} canCreate={role === "INSTITUCION"} />
-        {notice && <p role="status" className="m-4 rounded-lg bg-green-50 p-3 text-sm text-green-800">{notice}</p>}
-        {error && <p role="alert" className="m-4 rounded-lg bg-red-50 p-3 text-sm text-red-800">{error}</p>}
-        {loading ? (
-          <p className="p-8 text-center text-gray-600">Cargando diplomas...</p>
-        ) : filtered.length === 0 ? (
-          <p className="p-8 text-center text-gray-600">{search ? 'No se encontraron diplomas con ese criterio.' : 'No hay diplomas para mostrar.'}</p>
-        ) : (
-          <AdminDiplomasTable diplomas={visible} busy={openingEdit} canDeactivate={role === "ADMIN"}
-            onEdit={(diploma) => openDetail(diploma, 'edit')}
-            onPreview={(diploma) => openDetail(diploma, 'preview')}
-            onDeactivate={(diploma) => { setSelected(diploma); setModal('deactivate'); }} />
-        )}
-        <nav aria-label="Paginación de diplomas" className="flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 p-4 text-sm text-gray-600">
-          <span>{role === 'INSTITUCION'
-            ? `${serverTotal} diploma(s) en la institución · Página ${currentPage} de ${pages} · Búsqueda en página actual`
-            : `${filtered.length} diploma(s) en la lista cargada · Página ${currentPage} de ${pages}`}</span>
-          <div className="flex gap-2">
-            <button type="button" disabled={currentPage <= 1 || loading} onClick={() => setPage((value) => Math.max(1, value - 1))}
-              className="rounded-lg border border-gray-300 px-3 py-2 disabled:cursor-not-allowed disabled:opacity-40">Anterior</button>
-            <button type="button" disabled={currentPage >= pages || loading} onClick={() => setPage((value) => Math.min(pages, value + 1))}
-              className="rounded-lg border border-gray-300 px-3 py-2 disabled:cursor-not-allowed disabled:opacity-40">Siguiente</button>
-          </div>
-        </nav>
-      </div>
+    <PageShell
+      title="Diplomas"
+      description={isAdmin
+        ? 'Todos los diplomas emitidos en EVOT. Para corregir uno, la institución debe pedir permiso de edición.'
+        : 'Diplomas emitidos por tu institución. Para corregir uno ya emitido, solicita permiso de edición desde "Editar".'}
+      actions={role === 'INSTITUCION' && <button type="button" className={btnPrimary} onClick={() => setCreating(true)}>Registrar diploma</button>}
+      notices={(
+        <>
+          {notice && <Notice tone="success" onClose={() => setNotice('')}>{notice}</Notice>}
+          {error && <Notice tone="error" onClose={() => setError('')}>{error}</Notice>}
+        </>
+      )}
+      toolbar={(
+        <div className="max-w-md">
+          <FormField
+            id="buscar-diploma"
+            label="Buscar"
+            hint={role === 'INSTITUCION' ? 'Busca en la página actual por código, programa o graduado.' : 'Por código, programa, graduado o institución.'}
+          >
+            <input type="search" className={inputClass} value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Ej. DIP-2024-001" />
+          </FormField>
+        </div>
+      )}
+      footer={!loading && (filtered.length > 0 || pages > 1) && (
+        <Pagination
+          page={currentPage}
+          totalPages={pages}
+          total={role === 'INSTITUCION' ? serverTotal : filtered.length}
+          onChange={setPage}
+          disabled={loading}
+          itemLabel="diplomas"
+        />
+      )}
+    >
+      <DataTable
+        caption="Diplomas"
+        columns={columns}
+        rows={visible}
+        loading={loading}
+        getRowKey={(row) => diplomaId(row) || row.codigoDiploma}
+        emptyMessage={search ? 'No se encontraron diplomas con ese criterio.' : 'No hay diplomas para mostrar.'}
+        emptyAction={!search && role === 'INSTITUCION' && <button type="button" className={btnPrimary} onClick={() => setCreating(true)}>Registrar el primer diploma</button>}
+      />
+      {role === 'INSTITUCION' && <CreateDiplomaModal open={creating} onClose={() => setCreating(false)} onSaved={onSaved} />}
       <UpdateDiplomaModal open={modal === 'edit'} diploma={selected} onClose={closeModal} onSaved={onSaved} />
       <ReadDiplomaModal open={modal === 'preview'} diploma={selected} onClose={closeModal} />
       <DeleteModal open={modal === 'deactivate'} diploma={selected} onClose={closeModal} onSaved={onSaved} />
-    </section>
+    </PageShell>
   );
 }
