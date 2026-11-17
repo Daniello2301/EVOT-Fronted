@@ -49,7 +49,7 @@ function StudentRegister() {
             // Axios ya rechaza respuestas HTTP no exitosas. El servicio devuelve data.
             await registerStudent(newStudent);
 
-            // 2. ⭐ Hacer login automático después del registro exitoso
+            // 2. Hacer login automático después del registro exitoso
             const session = await login(formData.correo, formData.contraseña);
             if (!session) throw new Error("El registro finalizó, pero no fue posible iniciar sesión");
             navigate(postLoginPath(session.pending, session.user?.rol), { replace: true });

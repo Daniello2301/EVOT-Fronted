@@ -130,7 +130,7 @@ export default function PrincipalDashboard() {
               {[0, 1, 2].map((row) => <div key={row} className="h-10 animate-pulse rounded bg-gray-100" />)}
             </div>
           ) : pending.length === 0 ? (
-            <p className="px-5 py-8 text-center text-sm text-slate-600">No tienes nada pendiente por revisar. 👍</p>
+            <p className="px-5 py-8 text-center text-sm text-slate-600">No tienes nada pendiente por revisar.</p>
           ) : (
             <ul className="divide-y divide-gray-100">
               {pending.map((item) => (
