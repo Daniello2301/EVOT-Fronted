@@ -1,151 +1,177 @@
-import { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { getAllGraduados, deactivateGraduado } from '../services/graduado.service';
+import { useState } from 'react';
+import PageShell from '../components/common/PageShell';
 import DataTable from '../components/common/DataTable';
+import Pagination from '../components/common/Pagination';
+import FilterBar from '../components/common/FilterBar';
+import FormField from '../components/common/FormField';
 import ConfirmModal from '../components/common/ConfirmModal';
-import CreateGraduadoModal from '../components/CreateGraduadoModal';
-import UpdateGraduadoModal from '../components/UpdateGraduadoModal';
+import StatusBadge from '../components/common/StatusBadge';
+import Notice from '../components/common/Notice';
+import GraduadoFormModal from '../components/graduados/GraduadoFormModal';
+import { btnLink, btnLinkDanger, btnPrimary, inputClass } from '../components/common/ui';
+import usePagedList from '../Hooks/usePagedList';
+import useFlash from '../Hooks/useFlash';
+import { useAuth } from '../context/AuthContext';
+import { deactivateGraduado, getAllGraduados, updateGraduado } from '../services/graduado.service';
+import { apiErrorMessage } from '../helpers/apiResponse.js';
+import { ROLES, describeActivo } from '../helpers/estados.js';
+import { formatDate, fullName, localInputDate } from '../helpers/formatters.js';
+import { graduadoFilters } from '../helpers/graduadoModel.js';
 
+const EMPTY_FILTERS = { numeroDocumento: '', nombres: '', apellidos: '', estado: '', desde: '', hasta: '' };
+
+/**
+ * Graduados.
+ * - INSTITUCION: ve los graduados con al menos un diploma de su institución y registra nuevos.
+ * - ADMIN: ve todos, corrige datos y activa/desactiva.
+ */
 export default function GraduadosViewDashboard() {
-    const { authUser } = useAuth();
-    const role = authUser?.rol;
+  const { authUser } = useAuth();
+  const isAdmin = authUser?.rol === ROLES.ADMIN;
+  const isInstitucion = authUser?.rol === ROLES.INSTITUCION;
+  const list = usePagedList(getAllGraduados);
+  const [draft, setDraft] = useState(EMPTY_FILTERS);
+  const [filterError, setFilterError] = useState('');
+  const [formState, setFormState] = useState(null); // { mode, graduado }
+  const [toggling, setToggling] = useState(null);
+  const [toggleBusy, setToggleBusy] = useState(false);
+  const [toggleError, setToggleError] = useState('');
+  const [flash, setFlash, clearFlash] = useFlash(7000);
 
-    const [graduados, setGraduados] = useState([]);
-    const [loading, setLoading] = useState(true);
+  const onDraft = (event) => setDraft((prev) => ({ ...prev, [event.target.name]: event.target.value }));
+  const applyDraft = () => {
+    const { params, error } = graduadoFilters(draft);
+    setFilterError(error);
+    if (params) list.applyFilters(params);
+  };
+  const clearDraft = () => { setDraft(EMPTY_FILTERS); setFilterError(''); list.applyFilters({}); };
 
-    const [openCreateModal, setOpenCreateModal] = useState(false);
-    const [graduadoToEdit, setGraduadoToEdit] = useState(null);
-    const [graduadoToDeactivate, setGraduadoToDeactivate] = useState(null);
-    const [deactivating, setDeactivating] = useState(false);
-    const [deactivateError, setDeactivateError] = useState('');
+  const activando = toggling?.estado === false;
+  const confirmToggle = async () => {
+    setToggleBusy(true);
+    setToggleError('');
+    try {
+      // No hay endpoint de "activar": se reactiva con PUT { estado: true }.
+      await (activando ? updateGraduado(toggling._id, { estado: true }) : deactivateGraduado(toggling._id));
+      setFlash(`${fullName(toggling)} quedó ${activando ? 'activo' : 'inactivo'}.`);
+      setToggling(null);
+      list.reload();
+    } catch (err) {
+      setToggleError(apiErrorMessage(err, 'No se pudo cambiar el estado del graduado.'));
+    } finally {
+      setToggleBusy(false);
+    }
+  };
 
-    const fetchGraduados = async () => {
-        setLoading(true);
-        try {
-            const response = await getAllGraduados();
-            setGraduados(response?.results ?? []);
-        } catch (error) {
-            console.log(error);
-        } finally {
-            setLoading(false);
-        }
-    };
+  const columns = [
+    {
+      header: 'Graduado',
+      primary: true,
+      render: (row) => (
+        <div className="min-w-0">
+          <p className="font-semibold text-gray-900">{fullName(row)}</p>
+          <p className="text-xs text-gray-500">{row.tipoDocumento} {row.numeroDocumento}</p>
+        </div>
+      )
+    },
+    { header: 'Nacimiento', render: (row) => formatDate(row.fechaNacimiento) },
+    { header: 'Registrado', render: (row) => formatDate(row.createdAt), hideOnMobile: true },
+    { header: 'Estado', render: (row) => <StatusBadge {...describeActivo(row.estado)} /> },
+    ...(isAdmin ? [{
+      header: 'Acciones',
+      actions: true,
+      render: (row) => (
+        <>
+          <button type="button" className={btnLink} onClick={() => setFormState({ mode: 'edit', graduado: row })} aria-label={`Editar a ${fullName(row)}`}>Editar</button>
+          {row.estado === false ? (
+            <button type="button" className={btnLink} onClick={() => setToggling(row)} aria-label={`Activar a ${fullName(row)}`}>Activar</button>
+          ) : (
+            <button type="button" className={btnLinkDanger} onClick={() => setToggling(row)} aria-label={`Desactivar a ${fullName(row)}`}>Desactivar</button>
+          )}
+        </>
+      )
+    }] : [])
+  ];
 
-    useEffect(() => {
-        fetchGraduados();
-    }, []);
+  return (
+    <PageShell
+      title="Graduados"
+      description={isAdmin
+        ? 'Todas las personas registradas como graduadas en EVOT.'
+        : 'Personas con al menos un diploma emitido por tu institución.'}
+      actions={isInstitucion && (
+        <button type="button" className={btnPrimary} onClick={() => setFormState({ mode: 'create', graduado: null })}>Registrar graduado</button>
+      )}
+      notices={(
+        <>
+          {flash && <Notice tone="success" onClose={clearFlash}>{flash}</Notice>}
+          {filterError && <Notice tone="error" onClose={() => setFilterError('')}>{filterError}</Notice>}
+        </>
+      )}
+      toolbar={(
+        <FilterBar onSubmit={applyDraft} onClear={clearDraft} busy={list.loading} label="Filtrar graduados">
+          <FormField id="filtro-grad-doc" label="Número de documento" hint="Coincidencia exacta.">
+            <input name="numeroDocumento" inputMode="numeric" className={inputClass} value={draft.numeroDocumento} onChange={onDraft} />
+          </FormField>
+          <FormField id="filtro-grad-nombres" label="Nombres">
+            <input name="nombres" className={inputClass} value={draft.nombres} onChange={onDraft} />
+          </FormField>
+          <FormField id="filtro-grad-apellidos" label="Apellidos">
+            <input name="apellidos" className={inputClass} value={draft.apellidos} onChange={onDraft} />
+          </FormField>
+          <FormField id="filtro-grad-estado" label="Estado">
+            <select name="estado" className={inputClass} value={draft.estado} onChange={onDraft}>
+              <option value="">Todos</option>
+              <option value="true">Activos</option>
+              <option value="false">Inactivos</option>
+            </select>
+          </FormField>
+          <FormField id="filtro-grad-desde" label="Registrado desde">
+            <input name="desde" type="date" max={draft.hasta || localInputDate(0)} className={inputClass} value={draft.desde} onChange={onDraft} />
+          </FormField>
+          <FormField id="filtro-grad-hasta" label="Registrado hasta">
+            <input name="hasta" type="date" min={draft.desde || undefined} max={localInputDate(0)} className={inputClass} value={draft.hasta} onChange={onDraft} />
+          </FormField>
+        </FilterBar>
+      )}
+      footer={!list.error && list.total > 0 && (
+        <Pagination page={list.page} totalPages={list.totalPages} total={list.total} onChange={list.setPage} disabled={list.loading} itemLabel="graduados" />
+      )}
+    >
+      <DataTable
+        caption="Graduados"
+        columns={columns}
+        rows={list.rows}
+        loading={list.loading}
+        error={list.error}
+        onRetry={list.reload}
+        emptyMessage={isInstitucion
+          ? 'Aún no hay graduados con diplomas de tu institución, o ninguno coincide con los filtros.'
+          : 'No hay graduados que coincidan con los filtros.'}
+      />
 
-    const handleConfirmDeactivate = async () => {
-        setDeactivating(true);
-        setDeactivateError('');
-        try {
-            await deactivateGraduado(graduadoToDeactivate._id);
-            setGraduadoToDeactivate(null);
-            await fetchGraduados();
-        } catch (error) {
-            setDeactivateError(error?.response?.data?.msg || 'No fue posible desactivar el graduado.');
-        } finally {
-            setDeactivating(false);
-        }
-    };
+      <GraduadoFormModal
+        show={!!formState}
+        mode={formState?.mode}
+        graduado={formState?.graduado}
+        onClose={() => setFormState(null)}
+        onSaved={(message) => { setFormState(null); setFlash(message); list.reload(); }}
+      />
 
-    const columns = [
-        { header: 'Documento', key: 'numeroDocumento' },
-        { header: 'Nombres', key: 'nombres' },
-        { header: 'Apellidos', key: 'apellidos' },
-        {
-            header: 'Fecha de nacimiento',
-            render: (row) => new Date(row.fechaNacimiento).toLocaleDateString('es-CO')
-        },
-        {
-            header: 'Estado',
-            render: (row) => (
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.estado ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                    {row.estado ? 'Activo' : 'Inactivo'}
-                </span>
-            )
-        },
-        {
-            header: 'Acciones',
-            render: (row) => (
-                <div className="flex items-center gap-3">
-                    {role === 'ADMIN' && (
-                        <button
-                            type="button"
-                            className="text-blue_primary hover:underline text-sm"
-                            onClick={() => setGraduadoToEdit(row)}
-                        >
-                            Editar
-                        </button>
-                    )}
-                    {role === 'ADMIN' && row.estado && (
-                        <button
-                            type="button"
-                            className="text-red-600 hover:underline text-sm"
-                            onClick={() => setGraduadoToDeactivate(row)}
-                        >
-                            Desactivar
-                        </button>
-                    )}
-                </div>
-            )
-        }
-    ];
-
-    return (
-        <section className="bg-gray-50 dark:bg-gray-900 sm:p-5 antialiased">
-            <div className="mx-auto max-w-screen-xl px-4 lg:px-12">
-                <div className="min-h-[30rem] bg-white dark:bg-gray-800 relative shadow-md sm:rounded-lg overflow-hidden">
-                    <div className="flex items-center justify-between p-4">
-                        <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Graduados</h1>
-                        {role === 'INSTITUCION' && (
-                            <button
-                                type="button"
-                                onClick={() => setOpenCreateModal(true)}
-                                className="rounded-lg bg-blue_primary px-4 py-2 text-sm font-medium text-white hover:bg-blue_dark transition-colors"
-                            >
-                                Agregar graduado
-                            </button>
-                        )}
-                    </div>
-                    <div className="overflow-x-auto">
-                        <DataTable
-                            columns={columns}
-                            rows={graduados}
-                            loading={loading}
-                            emptyMessage="No hay graduados para mostrar."
-                        />
-                    </div>
-                </div>
-            </div>
-
-            <CreateGraduadoModal
-                show={openCreateModal}
-                onClose={() => setOpenCreateModal(false)}
-                onCreated={() => {
-                    setOpenCreateModal(false);
-                    fetchGraduados();
-                }}
-            />
-
-            <UpdateGraduadoModal
-                graduado={graduadoToEdit}
-                onClose={() => setGraduadoToEdit(null)}
-                onUpdated={() => {
-                    setGraduadoToEdit(null);
-                    fetchGraduados();
-                }}
-            />
-
-            <ConfirmModal
-                show={!!graduadoToDeactivate}
-                onClose={() => { setGraduadoToDeactivate(null); setDeactivateError(''); }}
-                onConfirm={handleConfirmDeactivate}
-                title="Desactivar graduado"
-                message={graduadoToDeactivate ? `¿Seguro que quieres desactivar a ${graduadoToDeactivate.nombres} ${graduadoToDeactivate.apellidos}?` : ''}
-                loading={deactivating}
-                error={deactivateError}
-            />
-        </section>
-    );
+      <ConfirmModal
+        show={!!toggling}
+        onClose={() => { setToggling(null); setToggleError(''); }}
+        onConfirm={confirmToggle}
+        tone={activando ? 'primary' : 'danger'}
+        title={activando ? 'Activar graduado' : 'Desactivar graduado'}
+        message={toggling ? (activando
+          ? `${fullName(toggling)} volverá a estar disponible para emitir diplomas.`
+          : `${fullName(toggling)} quedará inactivo. Puedes volver a activarlo después.`) : ''}
+        confirmLabel={activando ? 'Activar' : 'Desactivar'}
+        cancelLabel="Cancelar"
+        loading={toggleBusy}
+        error={toggleError}
+      />
+    </PageShell>
+  );
 }
